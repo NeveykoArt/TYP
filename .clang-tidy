@@ -6,11 +6,15 @@ Checks: >
   -cert-err58-cpp,
   -fuchsia-*,
   -llvm-header-guard,
+  -llvmlibc-implementation-in-namespace,
+  -llvmlibc-callee-namespace,
+  -llvmlibc-restrict-system-libc-headers,
   -modernize-use-nodiscard,
   -modernize-use-trailing-return-type,
   -cppcoreguidelines-owning-memory,
   -google-runtime-references,
-  -readability-redundant-access-specifiers
+  -readability-redundant-access-specifiers,
+  -cppcoreguidelines-avoid-non-const-global-variables
 WarningsAsErrors: ''
 HeaderFilterRegex: '(json-parser/*|libjson/*)'
 AnalyzeTemporaryDtors: false

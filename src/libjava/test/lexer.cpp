@@ -18,8 +18,8 @@ TEST(LexerSuite, ValidNumbers) {
   // Then
   EXPECT_EQ(
       out.str(),
-      "Loc=<1:0>\tINTEGER '0'\n"
-      "Loc=<1:2>\tINTEGER '123456789'\n");
+      "Loc=<1:0>\tDECIMAL_LITERAL '0'\n"
+      "Loc=<1:2>\tDECIMAL_LITERAL '123456789'\n");
 }
 
 TEST(LexerSuite, InvalidTokens) {
@@ -33,9 +33,7 @@ TEST(LexerSuite, InvalidTokens) {
   // Then
   EXPECT_EQ(
       out.str(),
-      "Loc=<1:0>\tINVALID 'a'\n"
-      "Loc=<1:1>\tINVALID 'b'\n"
-      "Loc=<1:2>\tINVALID 'c'\n");
+      "Loc=<1:0>\tIDENTIFIER 'abc'\n");
 }
 
 }  // namespace java::test
