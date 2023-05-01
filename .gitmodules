@@ -1,0 +1,9 @@
+[submodule "thirdparty/fmt"]
+	path = thirdparty/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "thirdparty/googletest"]
+	path = thirdparty/googletest
+	url = https://github.com/google/googletest.git
+[submodule "thirdparty/cxxopts"]
+	path = thirdparty/cxxopts
+	url = https://github.com/jarro2783/cxxopts.git
