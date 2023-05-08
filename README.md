@@ -1,3 +1,3 @@
 # TYP
-Compiler Java (9 var)
+Compiler C# (8 var)
 by NeveykoArt & Gusev-Art
