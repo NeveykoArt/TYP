@@ -1,20 +1,20 @@
-#include <libjava/dump_tokens.hpp>
+#include <libcs/dump_tokens.hpp>
 
-#include <JavaLexer.h>
+#include <CSharpLexer.h>
 #include <antlr4-runtime.h>
 #include <fmt/format.h>
 
-namespace java {
+namespace csharp {
 
 static std::string_view get_token_type_name(
-    const JavaLexer& lexer,
+    const CSharpLexer& lexer,
     const antlr4::Token& token) {
   return lexer.getVocabulary().getSymbolicName(token.getType());
 }
 
 void dump_tokens(std::istream& in, std::ostream& out) {
   antlr4::ANTLRInputStream stream(in);
-  JavaLexer lexer(&stream);
+  CSharpLexer lexer(&stream);
 
   for (auto token = lexer.nextToken(); token->getType() != antlr4::Token::EOF;
        token = lexer.nextToken()) {
@@ -27,4 +27,4 @@ void dump_tokens(std::istream& in, std::ostream& out) {
   }
 }
 
-}  // namespace java
+}  // namespace csharp

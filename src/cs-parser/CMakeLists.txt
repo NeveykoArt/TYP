@@ -1,4 +1,4 @@
-set(app_name java-parser)
+set(app_name cs-parser)
 
 add_executable(${app_name})
 
@@ -17,7 +17,7 @@ target_link_libraries(
   ${app_name}
   PRIVATE
     cxxopts
-    java
+    csharp
 )
 
 set_target_properties(

@@ -14,7 +14,13 @@ Checks: >
   -cppcoreguidelines-owning-memory,
   -google-runtime-references,
   -readability-redundant-access-specifiers,
-  -cppcoreguidelines-avoid-non-const-global-variables
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -readability-static-accessed-through-instance,
+  -modernize-return-braced-init-list,
+  -altera-unroll-loops,
+  -hicpp-named-parameter,
+  -modernize-return-braced-init-list,
+  -altera-id-dependent-backward-branch
 WarningsAsErrors: ''
 HeaderFilterRegex: '(json-parser/*|libjson/*)'
 AnalyzeTemporaryDtors: false

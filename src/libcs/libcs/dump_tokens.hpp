@@ -2,8 +2,8 @@
 
 #include <iosfwd>
 
-namespace java {
+namespace csharp {
 
 void dump_tokens(std::istream& in, std::ostream& out);
 
-}  // namespace java
+}  // namespace csharp

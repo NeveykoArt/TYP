@@ -1,3 +1,3 @@
 add_subdirectory(grammar)
-add_subdirectory(java-parser)
-add_subdirectory(libjava)
+add_subdirectory(cs-parser)
+add_subdirectory(libcs)

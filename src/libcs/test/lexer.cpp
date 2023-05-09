@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include <libjava/dump_tokens.hpp>
+#include <libcs/dump_tokens.hpp>
 
 #include <sstream>
 #include <string>
 
-namespace java::test {
+namespace csharp::test {
 
 TEST(LexerSuite, ValidNumbers) {
   // Given
@@ -18,11 +18,10 @@ TEST(LexerSuite, ValidNumbers) {
   // Then
   EXPECT_EQ(
       out.str(),
-      "Loc=<1:0>\tDECIMAL_LITERAL '0'\n"
-      "Loc=<1:2>\tDECIMAL_LITERAL '123456789'\n");
+      "Loc=<1:0>\tNUMBER '0'\nLoc=<1:2>\tNUMBER '123456789'\n");
 }
 
-TEST(LexerSuite, InvalidTokens) {
+TEST(LexerSuite, StringTokens) {
   // Given
   std::stringstream in("abc");
 
@@ -33,7 +32,7 @@ TEST(LexerSuite, InvalidTokens) {
   // Then
   EXPECT_EQ(
       out.str(),
-      "Loc=<1:0>\tIDENTIFIER 'abc'\n");
+      "Loc=<1:0>\tID 'abc'\n");
 }
 
-}  // namespace java::test
+}  // namespace csharp::test
