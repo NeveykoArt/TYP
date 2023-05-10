@@ -1,22 +1,20 @@
 grammar CSharp;
 
 program: class EOF;
-class: CLASS ID CLB expressions* CRB;
+class: CLASS ID CLB expression CRB;
+expression: (expressions)*;
 expressions: ( func_def | (assign_statement SEMICOLON) | if_statement | for_statement | print_statement | read_statement);
 assign_statement: (ID | var_def) (
-		ASSIGN (
-			((ID | literal) ((BINARY_OP (ID | literal)))?)
-			| func_call
-		)
-	)?;
+				ASSIGN (
+					(arg (BINARY_OP arg)?)
+					| func_call
+				       )
+				)?;
 literal: TEXT | NUMBER | CHARv | FLOAT_NUMBER;
 var_def: VAR ID | VAR SLP SRP ID;
-func_def: (KEYWORD* VAR | VAR | KEYWORD* VOID) ID RLP pars RRP (
-		(SEMICOLON)
-		| (CLB scope (return_statement)? CRB)
-	);
+func_def: (VAR | (KEYWORD* VOID) | VOID) ID RLP pars RRP (CLB scope return_statement CRB);
 scope: (statement)*;
-return_statement: RETURN (literal | ID) SEMICOLON;
+return_statement: RETURN arg SEMICOLON;
 statement: (func_call SEMICOLON)
 	| (assign_statement SEMICOLON)
 	| if_statement | for_statement | (kw_statement SEMICOLON) | print_statement | read_statement;
@@ -25,10 +23,10 @@ args: (arg (COMMA arg)*)?;
 arg: ID | literal;
 pars: (var_def (COMMA var_def)*)?;
 if_statement:
-	IF RLP ID (LOGIC_OP (ID | literal))? RRP CLB scope CRB (else_statement)?;
+	IF RLP ID (LOGIC_OP arg)? RRP CLB scope CRB (else_statement)?;
 else_statement: ELSE CLB scope CRB;
 for_statement: FOR RLP assign_statement SEMICOLON for_condition SEMICOLON for_operation RRP CLB scope CRB;
-for_condition: ID LOGIC_OP (ID | literal);
+for_condition: ID LOGIC_OP arg;
 for_operation: (ID UNARYMATHEXP) | assign_statement;
 kw_statement: KEYWORD;
 print_statement: WRITELN RLP ID RRP SEMICOLON;

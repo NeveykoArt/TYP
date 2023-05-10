@@ -45,7 +45,6 @@ int main(int argc, char **argv) {
     if (result.count(dump_tokens_opt) > 0) {
       csharp::dump_tokens(input_stream, std::cout);
     } else if (result.count(dump_ast_opt) > 0) {
-      std::cout<< "rfoireoipf\n";
       auto parser_result = csharp::parse(input_stream);
       if (!parser_result.errors_.empty()) {
         csharp::dump_errors(parser_result.errors_, std::cerr);

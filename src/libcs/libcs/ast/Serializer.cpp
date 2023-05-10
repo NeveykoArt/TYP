@@ -6,10 +6,9 @@
 namespace csharp::ast {
 
 void Serializer::exec(Program &program, std::ostream &out) {
-    std::cout << "pizda228";
     Serializer xml_serializer;
     xml_serializer.nodes_.push(xml_serializer.doc_.append_child("csharp"));
-    if (program.get_csclass() == nullptr) std::cout << "pizda";
+    if (program.get_csclass() == nullptr) std::cout << "AAAAAAA\n";
     program.get_csclass()->accept(xml_serializer);
     xml_serializer.doc_.save(out, "  ");
 }
@@ -20,7 +19,7 @@ void Serializer::visit(CSClass &node) {
 
     auto header = append_child("id");
     nodes_.push(header);
-    append_text(node.get_class_name().c_str());
+    append_text(node.get_csclass_name().c_str());
     nodes_.pop();
     nodes_.pop();
 

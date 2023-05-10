@@ -7,6 +7,7 @@ namespace csharp::ast {
 class Visitor {
  public:
     virtual void visit(CSClass &node) = 0;
+    virtual void visit(Expression &node) = 0;
     virtual void visit(Expressions &node) = 0;
     virtual void visit(Assign_statement &node) = 0;
     virtual void visit(Literal &node) = 0;

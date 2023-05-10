@@ -23,7 +23,7 @@ private:
 public:
     static void exec(Program &program, std::ostream &out);
     void visit(CSClass &node) override;
-
+    void visit([[maybe_unused]]Expression &node) override {}
     void visit([[maybe_unused]]Expressions &node) override {}
     void visit([[maybe_unused]]Assign_statement &node) override {}
     void visit([[maybe_unused]]Literal &node) override {}

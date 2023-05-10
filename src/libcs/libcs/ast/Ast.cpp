@@ -3,8 +3,8 @@
 
 namespace csharp::ast {
     void CSClass::accept(Visitor &visitor) { visitor.visit(*this); }
+    void Expression::accept(Visitor &visitor) { visitor.visit(*this); }
     void Expressions::accept(Visitor &visitor) { visitor.visit(*this); }
-    /*
     void Assign_statement::accept(Visitor &visitor) { visitor.visit(*this); }
     void Literal::accept(Visitor &visitor) { visitor.visit(*this); }
     void Var_def::accept(Visitor &visitor) { visitor.visit(*this); }
@@ -24,5 +24,4 @@ namespace csharp::ast {
     void Kw_statement::accept(Visitor &visitor) { visitor.visit(*this); }
     void Print_statement::accept(Visitor &visitor) { visitor.visit(*this); }
     void Read_statement::accept(Visitor &visitor) { visitor.visit(*this); }
-    */
 }  // namespace csharp::ast

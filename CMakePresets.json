@@ -10,8 +10,8 @@
       "name": "base",
       "generator": "Unix Makefiles",
       "cacheVariables": {
-        "ANTLR_EXECUTABLE": "${sourceDir}/antlr-4.10.1-complete.jar",
-        "ANTLR4_TAG": "v4.10.1"
+        "ANTLR_EXECUTABLE": "${sourceDir}/antlr-4.11.1-complete.jar",
+        "ANTLR4_TAG": "v4.11.1"
       }
     },
     {

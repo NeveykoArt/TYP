@@ -34,13 +34,10 @@ class StreamErrorListener : public antlr4::BaseErrorListener {
 }  // namespace
 
 ParseResult parse(std::ifstream &input_stream) {
-  std::cout << "pizdaP1000456546";
   antlr4::ANTLRInputStream stream(input_stream);
   CSharpLexer lexer(&stream);
   antlr4::CommonTokenStream tokens(&lexer);
   CSharpParser parser(&tokens);
-
-  std::cout << "pizdaP1000";
 
   StreamErrorListener error_listener;
   parser.removeErrorListeners();
@@ -53,11 +50,8 @@ ParseResult parse(std::ifstream &input_stream) {
     return ParseResult::errors(errors);
   }
 
-  std::cout << "pizdaP1";
   ast::Program program;
-  std::cout << "pizdaP2";
   ast::detail::Builder builder(program);
-  std::cout << "pizdaP3";
   builder.visit(program_parse_tree);
 
   return ParseResult::program(std::move(program));

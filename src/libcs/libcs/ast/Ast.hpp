@@ -10,30 +10,31 @@ namespace csharp::ast {
 
 class Visitor;
 
-class Node;
-
 class Program;
 class CSClass;
+class Expression;
 class Expressions;
-class Assign_statement;
-class Literal;
+class Kw_statement;
 class Var_def;
-class Func_def;
-class Scope;
-class Return_statement;
-class Statement;
+class Print_statement;
+class Read_statement;
 class Func_call;
-class Args;
+class Arguments;
 class Arg;
-class Pars;
+class Literal;
+class Statement;
+class Scope;
 class If_statement;
 class Else_statement;
+class Return_statement;
+class Pars;
+class Func_def;
+
+class Assign_statement;
+
 class For_statement;
 class For_condition;
 class For_operation;
-class Kw_statement;
-class Print_statement;
-class Read_statement;
 
 class Node {
 public:
@@ -42,505 +43,364 @@ public:
     virtual void accept(Visitor &visitor) = 0;
 };
 
-class Statement : public Node {
-public:
-    virtual ~Statement() = default;
 
-    virtual void accept(Visitor &visitor) = 0;
-};
 
-class Program {
+class Program final {
 private:
-    CSClass *csclass_ptr = nullptr;
+    std::vector<std::unique_ptr<Node>> members_;
+    Node *csclass_ptr_ = nullptr;
 
 public:
-    Program() = default;
-    void set_csclass(CSClass *cscptr) { csclass_ptr = cscptr; }
-    CSClass *get_csclass() { return csclass_ptr; }
+    template <class T, class... Args> T *create_node(Args &&...args) {
+        static_assert(std::is_base_of_v<Node, T>);
+        members_.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+        return dynamic_cast<T *>(members_.back().get());
+    }
+    void set_csclass(Node *csclass_ptr) { csclass_ptr_ = csclass_ptr; }
+    Node *get_csclass() { return csclass_ptr_; }
 };
+
+
 
 class CSClass final : public Node {
 private:
-    Expressions *expr_ptr = nullptr;
-    std::string class_name;
+    std::string csclass_name_;
+    Expression* expression_;
 
 public:
-    CSClass() = default;
-    std::string &get_class_name() { return class_name; }
-    void set_class_name(std::string cname) { class_name = cname; };
+    explicit CSClass(std::string id, Expression* expression)
+        : csclass_name_(std::move(id)), expression_(expression) {}
+    Expression* get_expr() const { return expression_; }
+    std::string get_csclass_name() { return csclass_name_; }
 
-    void set_exprs(Expressions *expr) { expr_ptr = expr; }
-    Expressions *get_exprs() { return expr_ptr; };
-
-    void accept(Visitor &visitor) override;
+    void accept(Visitor& visitor) override;
 };
+
+
+
+class Expression final : public Node {
+private:
+    std::vector<Expressions *> expressions_;
+
+public:
+    explicit Expression(std::vector<Expressions *> expressions) : expressions_(std::move(expressions)) {}
+    std::vector<Expressions *> get_exprs() const { return expressions_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
 
 class Expressions final : public Node {
 private:
-    std::vector<ast::Statement *> components;
+    Node* elem_;
 
 public:
-    explicit Expressions(std::vector<ast::Statement *> components_)
-        : components(std::move(components_)) {}
+    explicit Expressions(Node* elem) : elem_(elem) {}
+    Node* get_elem() const { return elem_; }
 
-    const std::vector<ast::Statement *> &get_components() const { return components; }
-
-    void accept(Visitor &visitor) override;
+    void accept(Visitor& visitor) override;
 };
 
-/*
-class Node
-{
-protected:
-    static inline std::size_t m_depth = 0;
-    static inline bool dpsn = false;
-    std::size_t line = 0;
-    std::size_t char_pos = 0;
-    bool x = false;
 
-public:
-    virtual ~Node() = default;
-    static void increase_depth() { m_depth += 2; }
-    static void decrease_depth()
-    {
-        if (m_depth >= 2)
-        {
-            m_depth -= 2;
-        }
-    }
-    void set_x(bool b) { x = b; }
-    bool get_x() { return x; }
-    void set_line(std::size_t l) { line = l; }
-    std::size_t get_line() { return line; }
-    void set_char_pos(std::size_t cp) { char_pos = cp; }
-    std::size_t get_char_pos() { return char_pos; }
-    static void set_depth(std::size_t d) { m_depth = d; }
-    static void set_dpsn(bool d) { dpsn = d; }
-    static bool get_dpsn() { return dpsn; }
-    static std::size_t get_depth() { return m_depth; }
-    virtual void accept(Visitor &visitor) = 0;
-};
 
-class Args : public Node
-{
+class Kw_statement final : public Node {
 private:
-    std::string arg;
-    bool is_lit = false;
+    std::string key_word_;
 
 public:
-    Args() = default;
-    bool is_literal() { return is_lit; }
-    void set_literal(bool l) { is_lit = l; }
-    std::string get_arg() { return arg; }
-    void set_arg(std::string a) { arg = a; }
-    void accept(Visitor &visitor) override;
-    ~Args() = default;
+    explicit Kw_statement(std::string key_word)
+        : key_word_(std::move(key_word)) {}
+    std::string get_key_word() { return key_word_; }
+
+    void accept(Visitor& visitor) override;
 };
 
-class Scope : public Node
-{
+
+
+class Var_def final : public Node {
 private:
-    std::vector<Node *> m_statements;
-    std::string scope_name;
-    std::map<std::string, std::string> variables;
+    std::string var_line_;
 
 public:
-    Scope() = default;
-    void append_var(std::string variable, std::string type) { variables[variable] = type; }
-    std::map<std::string, std::string> get_var_map() { return variables; }
-    void append_statement(Node *node);
-    Node *get_statement(std::size_t i);
-    std::string get_scope_name() { return scope_name; }
-    void set_scope_name(std::string sn) { scope_name = sn; }
-    std::vector<Node *> get_statements();
-    void remove_statement(Node *r)
-    {
-        for (auto it = m_statements.begin(); it != m_statements.end(); it++)
-        {
-            if (*it == r)
-            {
-                m_statements.erase(it);
-                return;
-            }
-        }
-    }
+    explicit Var_def(std::string var_line)
+        : var_line_(std::move(var_line)) {}
+    std::string get_var_line() { return var_line_; }
 
-    void accept(Visitor &visitor) override;
-    ~Scope()
-    {
-        for (std::size_t i = 0; i < m_statements.size(); i++)
-        {
-            delete m_statements[i];
-        }
-    }
+    void accept(Visitor& visitor) override;
 };
 
-class Variable : public Node
-{
+
+
+class Pars final : public Node {
 private:
-    std::string fragment_data = "";
-    std::string m_var_name = "";
-    bool is_lit = false;
-    std::string m_var_type = "";
-    std::string expr_type = "";
-    std::string ctx_type = "";
-    std::string func_name = "";
+    std::vector<Var_def *> defs_;
 
 public:
-    Variable() = default;
-    std::string get_frag() { return fragment_data; }
-    void set_frag(std::string f) { fragment_data = f; }
-    std::string get_ctx_type() { return ctx_type; }
-    void set_ctx_type(std::string s) { ctx_type = s; }
-    std::string get_expr_type() { return expr_type; }
-    void set_expr_type(std::string s) { expr_type = s; }
-    std::string get_var_name() { return m_var_name; }
-    void set_var_name(std::string s) { m_var_name = s; }
-    std::string get_var_type() { return m_var_type; }
-    void set_var_type(std::string s) { m_var_type = s; }
-    std::string get_func_name() { return func_name; }
-    void set_func_name(std::string s) { func_name = s; }
-    void set_literal(bool l) { is_lit = l; }
-    bool is_literal() { return is_lit; }
-    void accept(Visitor &visitor) override;
-    ~Variable() = default;
+    explicit Pars(std::vector<Var_def *> defs) : defs_(std::move(defs)) {}
+    std::vector<Var_def *> get_pars() const { return defs_; }
+
+    void accept(Visitor& visitor) override;
 };
 
-class FuncCall : public Node
-{
+
+
+class Statement final : public Node {
 private:
-    std::string m_func_name;
-    std::vector<Args *> args;
-    std::vector<std::pair<std::string, std::string>> vector_args;
+    Node* elem_;
 
 public:
-    FuncCall() = default;
+    explicit Statement(Node* elem) : elem_(elem) {}
+    Node* get_statement_elem() const { return elem_; }
 
-    std::string &func_name();
-    std::vector<Args *> get_args() { return args; }
-    Args *get_arg(std::size_t i) { return args[i]; }
-    void set_args(Args *a, size_t i) { args[i] = a; }
-    void append_arg(Args *a) { args.push_back(a); }
-    void append_args_to_vector(std::string name, std::string type) { vector_args.push_back(std::make_pair(name, type)); }
-    std::vector<std::pair<std::string, std::string>> get_args_from_vector() { return vector_args; }
-    void accept(Visitor &visitor) override;
-    ~FuncCall()
-    {
-        for (std::size_t i = 0; i < args.size(); i++)
-        {
-            delete args[i];
-        }
-    }
+    void accept(Visitor& visitor) override;
 };
 
-class Assign : public Node
-{
+
+
+class Scope final : public Node {
 private:
-    Variable *lvalue = nullptr;
-    Variable *rvalue1 = nullptr;
-    Variable *rvalue2 = nullptr;
-    FuncCall *funccall = nullptr;
-    std::string oper;
+    std::vector<Statement *> statements_;
 
 public:
-    Assign() = default;
-    void set_lvalue(Variable *a) { lvalue = a; }
-    void set_rvalue1(Variable *a) { rvalue1 = a; }
-    void set_rvalue2(Variable *a) { rvalue2 = a; }
-    void set_funccall(FuncCall *f) { funccall = f; }
-    void set_oper(std::string o) { oper = o; }
+    explicit Scope(std::vector<Statement *> statements) : statements_(std::move(statements)) {}
+    std::vector<Statement *> get_args() const { return statements_; }
 
-    Variable *get_lvalue() { return lvalue; }
-    Variable *get_rvalue1() { return rvalue1; }
-    Variable *get_rvalue2() { return rvalue2; }
-    FuncCall *get_funccall() { return funccall; }
-    std::string get_oper() { return oper; }
-
-    void accept(Visitor &visitor) override;
-
-    ~Assign()
-    {
-        delete lvalue;
-        delete rvalue1;
-        delete rvalue2;
-        delete funccall;
-    }
+    void accept(Visitor& visitor) override;
 };
 
-class Program : public Node
-{
-    CSClass *class_ptr;
 
-public:
-    Program() = default;
-    CSClass *get_class() { return class_ptr; }
-    void accept(Visitor &visitor) override;
-};
 
-class CSClass : public Node
-{
+class Arguments final : public Node {
 private:
-    std::vector<Node *> m_children;
+    std::vector<Arg *> args_;
 
 public:
-    CSClass() = default;
+    explicit Arguments(std::vector<Arg *> args) : args_(std::move(args)) {}
+    std::vector<Arg *> get_args() const { return args_; }
 
-    void append_child(Node *node);
-    const Node *get_child(std::size_t i) const;
-
-    std::vector<Node *> get_children();
-    void accept(Visitor &visitor) override;
-    void remove_child(Node *r)
-    {
-        for (auto it = m_children.begin(); it != m_children.end(); it++)
-        {
-            if (*it == r)
-            {
-                m_children.erase(it);
-                return;
-            }
-        }
-    }
-    ~CSClass()
-    {
-        for (std::size_t i = 0; i < m_children.size(); i++)
-        {
-            delete m_children[i];
-        }
-    }
+    void accept(Visitor& visitor) override;
 };
 
-class Read : public Node
-{
-    std::string type = "";
-    std::string name = "";
 
-public:
-    Read() = default;
-    std::string get_type() { return type; }
-    std::string get_name() { return name; }
-    void set_type(std::string t) { type = t; }
-    void set_name(std::string n) { name = n; }
-    void accept(Visitor &visitor) override;
-    ~Read() = default;
-};
 
-class ForCond : public Node
-{
-    std::string first = "";
-    std::string second = "";
-    std::string op = "";
-    bool is_lit = false;
-
-public:
-    ForCond() = default;
-    void set_first(std::string f) { first = f; }
-    void set_second(std::string s) { second = s; }
-    void set_op(std::string o) { op = o; }
-    void set_literal(bool l) { is_lit = l; }
-
-    std::string get_first() { return first; }
-    std::string get_second() { return second; }
-    std::string get_op() { return op; }
-    bool is_literal() { return is_lit; }
-    void accept(Visitor &visitor) override;
-    ~ForCond() = default;
-};
-
-class ForOp : public Node
-{
-    Assign *for_op_assign = nullptr;
-    std::string id = "";
-    std::string unary_op = "";
-
-public:
-    ForOp() = default;
-    void set_assign(Assign *a) { for_op_assign = a; }
-    void set_id(std::string i) { id = i; }
-    void set_unary_op(std::string uo) { unary_op = uo; }
-
-    Assign *get_assign() { return for_op_assign; }
-    std::string get_id() { return id; }
-    std::string get_unary_op() { return unary_op; }
-    void accept(Visitor &visitor) override;
-
-    ~ForOp() { delete for_op_assign; }
-};
-
-class For : public Node
-{
-    Assign *assign;
-    ForCond *condition;
-    ForOp *op;
-    Scope *scope;
-
-public:
-    For() = default;
-    void set_assing(Assign *a) { assign = a; }
-    void set_cond(ForCond *c) { condition = c; }
-    void set_op(ForOp *o) { op = o; }
-    void set_scope(Scope *s) { scope = s; }
-
-    Assign *get_assing() { return assign; }
-    ForCond *get_cond() { return condition; }
-    ForOp *get_op() { return op; }
-    Scope *get_scope() { return scope; }
-    void accept(Visitor &visitor) override;
-    ~For()
-    {
-        delete assign;
-        delete condition;
-        delete op;
-        delete scope;
-    }
-};
-
-class Return : public Node
-{
+class Arg final : public Node {
 private:
-    std::string return_value = "";
-    std::string type = "";
-    bool is_lit = false;
+    std::string arg_id_;
+    Literal* arg_;
 
 public:
-    Return() = default;
-    bool is_literal() { return is_lit; }
-    std::string get_return_value() { return return_value; }
-    void set_return_value(std::string rv) { return_value = rv; }
-    std::string get_return_type() { return type; }
-    void set_return_type(std::string t) { type = t; }
-    void set_literal(bool l) { is_lit = l; }
-    ~Return() = default;
+    explicit Arg(std::string arg_id) : arg_id_(std::move(arg_id)) {}
+    explicit Arg(Literal* arg) : arg_(arg) {}
+    Literal* get_arg() const { return arg_; }
+    std::string get_arg_id() { return arg_id_; }
 
-    void accept(Visitor &visitor) override;
+    void accept(Visitor& visitor) override;
 };
 
-class Function : public Node
-{
-    using Pars = std::vector<std::pair<std::string, std::string>>;
 
+
+class Literal final : public Node {
 private:
-    std::string m_func_name;
-    std::string m_return_type;
-    Pars pars;
-    std::vector<Variable *> params;
-    Return *m_return = nullptr;
-    Scope *m_scope = nullptr;
+    std::string literal_;
 
 public:
-    Function() = default;
-    std::string &return_type();
-    std::string &func_name();
-    void set_scope(Scope *sc)
-    {
-        m_scope = sc;
-    }
-    Scope *get_scope()
-    {
-        return m_scope;
-    }
-    void set_return(Return *r)
-    {
-        m_return = r;
-    }
-    Return *get_return()
-    {
-        return m_return;
-    }
+    explicit Literal(std::string literal)
+        : literal_(std::move(literal)) {}
+    std::string get_literal() { return literal_; }
 
-    void accept(Visitor &visitor) override;
-    ~Function()
-    {
-        delete m_scope;
-        delete m_return;
-    }
-
-    std::vector<Variable *> get_params() { return params; }
-
-    void append_param(Variable *p) { params.push_back(p); }
-    void append_param_to_vector(std::string name, std::string type) { pars.push_back(std::make_pair(name, type)); }
-    Pars get_param_from_vector() { return pars; }
+    void accept(Visitor& visitor) override;
 };
 
-class Else : public Node
-{
-    Scope *m_scope = nullptr;
+
+
+class Func_call final : public Node {
+private:
+    std::string func_name_;
+    Arguments* args_;
 
 public:
-    Else() = default;
-    void set_scope(Scope *sc) { m_scope = sc; }
-    Scope *get_scope() { return m_scope; }
+    explicit Func_call(std::string func_name, Arguments* args)
+        : func_name_(std::move(func_name)), args_(args) {}
+    Arguments* get_args() const { return args_; }
+    std::string get_func_name() { return func_name_; }
 
-    void accept(Visitor &visitor) override;
-    ~Else()
-    {
-        delete m_scope;
-    }
+    void accept(Visitor& visitor) override;
 };
 
-class If : public Node
-{
-    std::string first = "";
-    std::string first_type = "";
-    std::string second = "";
-    std::string second_type = "";
-    bool is_lit = false;
-    std::string op = "";
-    Scope *m_scope = nullptr;
-    Else *else_statement = nullptr;
+
+
+class Return_statement final : public Node {
+private:
+    Arg* arg_;
 
 public:
-    If() = default;
-    void set_else(Else *es) { else_statement = es; }
-    void set_first(std::string s) { first = s; }
-    void set_first_type(std::string s) { first_type = s; }
-    void set_second(std::string s) { second = s; }
-    void set_second_type(std::string s) { second_type = s; }
-    void set_op(std::string s) { op = s; }
+    explicit Return_statement(Arg* arg)
+        : arg_(arg) {}
+    Arg* get_return_arg() const { return arg_; }
 
-    void set_literal(bool l) { is_lit = l; }
-    bool is_literal() { return is_lit; }
-
-    Else *get_else() { return else_statement; }
-    std::string get_first() { return first; }
-    std::string get_first_type() { return first_type; }
-    std::string get_second() { return second; }
-    std::string get_second_type() { return second_type; }
-    std::string get_op() { return op; }
-
-    void set_scope(Scope *sc) { m_scope = sc; }
-    Scope *get_scope() { return m_scope; }
-
-    void accept(Visitor &visitor) override;
-
-    ~If() { delete m_scope; }
+    void accept(Visitor& visitor) override;
 };
 
-class Kw : public Node
-{
-    std::string kw = "";
+
+
+class Func_def final : public Node {
+private:
+    std::vector<Kw_statement*> kw_;
+    std::string var_;
+    bool void_;
+    std::string func_name_;
+    Pars* pars_;
+    Scope* scope_;
+    Return_statement* return_;
 
 public:
-    Kw() = default;
-    std::string get_kw() { return kw; }
-    void set_kw(std::string k) { kw = k; }
-    void accept(Visitor &visitor) override;
-    ~Kw() = default;
+    explicit Func_def(bool void_tmp, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
+    : void_(std::move(void_tmp)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
+    explicit Func_def(std::string var, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
+    : var_(std::move(var)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
+    explicit Func_def(std::vector<Kw_statement*> kw, bool void_tmp, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
+    : kw_(std::move(kw)), void_(std::move(void_tmp)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
+
+    std::vector<Kw_statement*> get_kw() const { return kw_; }
+    std::string get_var() { return var_; }
+    bool get_void() { return void_; }
+    std::string get_func_name() { return func_name_; }
+    Pars* get_pars() const { return pars_; }
+    Scope* get_scope() const { return scope_; }
+    Return_statement* get_return() const { return return_; }
+
+    void accept(Visitor& visitor) override;
 };
 
-class Print : public Node
-{
-    std::string type = "";
-    std::string name = "";
+
+
+class Assign_statement final : public Node {
+private:
+    std::string id_left_;
+    Var_def* var_def_;
+    std::vector<Arg*> arg_rigth_;
+    std::string bin_op_;
+    Func_call* func_call_;
 
 public:
-    Print() = default;
-    std::string get_type() { return type; }
-    std::string get_name() { return name; }
-    void set_type(std::string t) { type = t; }
-    void set_name(std::string n) { name = n; }
-    void accept(Visitor &visitor) override;
-    ~Print() = default;
-};*/
+    explicit Assign_statement(std::string id_left, std::vector<Arg*> arg_rigth)
+    : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth) {}
+    explicit Assign_statement(std::string id_left, std::vector<Arg*> arg_rigth, std::string bin_op)
+    : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth), bin_op_(std::move(bin_op)) {}
+    explicit Assign_statement(std::string id_left, Func_call* func_call)
+    : id_left_(std::move(id_left)), func_call_(func_call) {}
+
+    explicit Assign_statement(Var_def* var_def, std::vector<Arg*> arg_rigth)
+    : var_def_(var_def), arg_rigth_(std::move(arg_rigth) {}
+    explicit Assign_statement(Var_def* var_def, std::vector<Arg*> arg_rigth, std::string bin_op)
+    : var_def_(var_def), arg_rigth_(std::move(arg_rigth), bin_op_(std::move(bin_op)) {}
+    explicit Assign_statement(Var_def* var_def, Func_call* func_call)
+    : var_def_(var_def), func_call_(func_call) {}
+
+    std::string get_id_left() { return id_left_; }
+    Var_def* get_var_def() const { return var_def_; }
+    std::vector<Arg*> get_arg_rigth() const { return arg_rigth_; }
+    std::string get_bin_op() { return bin_op_; }
+    Func_call* get_func_call() { return func_call_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class For_statement final : public Node {
+private:
+
+public:
+
+};
+
+
+
+class If_statement final : public Node {
+private:
+    std::string arg1_;
+    std::string logic_op_;
+    Arg* arg2_;
+    Scope* scope_;
+    Else_statement* else_;
+
+public:
+    explicit If_statement(std::string arg1, Scope* scope) : arg1_(std::move(arg1)), scope_(scope) {}
+    explicit If_statement(std::string arg1, std::string logic_op, Arg* arg2, Scope* scope) : arg1_(std::move(arg1)), logic_op_(std::move(logic_op)), arg2_(arg2), scope_(scope) {}
+    explicit If_statement(std::string arg1, Scope* scope, Else_statement* else_tmp) : arg1_(std::move(arg1)), scope_(scope), else_(else_tmp) {}
+    explicit If_statement(std::string arg1, std::string logic_op, Arg* arg2, Scope* scope, Else_statement* else_tmp)
+    : arg1_(std::move(arg1)), logic_op_(std::move(logic_op)), arg2_(arg2), scope_(scope), else_(else_tmp) {}
+
+    std::string get_if_1_arg() { return arg1_; }
+    std::string get_if_log_op() { return logic_op_; }
+    Arg* get_if_2_arg() const { return arg2_; }
+    Scope* get_if_scope() const { return scope_; }
+    Else_statement* get_if_else() const { return else_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class Else_statement final : public Node {
+private:
+    Scope* scope_;
+
+public:
+    explicit Else_statement(Scope* scope)
+        : scope_(scope) {}
+    Scope* get_else_scope() const { return scope_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class For_condition final : public Node {
+private:
+    std::string arg1_;
+    std::string logic_op_;
+    Arg* arg2_;
+
+public:
+    explicit For_condition(std::string arg1, std::string logic_op, Arg* arg2)
+        : arg1_(std::move(arg1)), logic_op_(std::move(logic_op)), arg2_(arg2) {}
+    std::string get_for_cond_1_arg() { return arg1_; }
+    std::string get_for_cond_log_op() { return logic_op_; }
+    Arg* get_for_cond_2_arg() const { return arg2_; }
+
+    void accept(Visitor& visitor) override;
+
+};
+
+
+
+class Read_statement final : public Node {
+private:
+    std::string read_;
+
+public:
+    explicit Read_statement(std::string read)
+        : read_(std::move(read)) {}
+    std::string get_read() { return read_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class Print_statement final : public Node {
+private:
+    std::string print_;
+
+public:
+    explicit Print_statement(std::string print)
+        : print_(std::move(print)) {}
+    std::string get_print() { return print_; }
+
+    void accept(Visitor& visitor) override;
+};
 
 }  // namespace csharp::ast
