@@ -162,10 +162,10 @@ COLON: ':';
 COMMA: ',';
 APOSTROPH: '\'';
 DQUOTES: '"';
-NUMBER: '0' | DIGITNOZERO (DIGIT)*;
+NUMBER: ('0' | [1-9] [0-9]*);
 
-TEXT: DQUOTES [0-9A-Za-z!?@#$%^&* ,.]+ DQUOTES;
-CHARv: APOSTROPH [0-9A-Za-z!?@#$%^&*.] APOSTROPH;
+TEXT: DQUOTES [A-Za-z0-9!?@#$%^&* ,.]+ DQUOTES;
+CHARv: APOSTROPH [A-Za-z0-9!?@#$%^&*.] APOSTROPH;
 FLOAT_NUMBER: NUMBER DOT NUMBER;
 
 fragment DIGITNOZERO: [1-9];

@@ -17,7 +17,7 @@ class Visitor {
     virtual void visit(Return_statement &node) = 0;
     virtual void visit(Statement &node) = 0;
     virtual void visit(Func_call &node) = 0;
-    virtual void visit(Args &node) = 0;
+    virtual void visit(Arguments &node) = 0;
     virtual void visit(Arg &node) = 0;
     virtual void visit(Pars &node) = 0;
     virtual void visit(If_statement &node) = 0;

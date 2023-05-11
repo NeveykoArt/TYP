@@ -13,7 +13,7 @@ namespace csharp::ast {
     void Return_statement::accept(Visitor &visitor) { visitor.visit(*this); }
     void Statement::accept(Visitor &visitor) { visitor.visit(*this); }
     void Func_call::accept(Visitor &visitor) { visitor.visit(*this); }
-    void Args::accept(Visitor &visitor) { visitor.visit(*this); }
+    void Arguments::accept(Visitor &visitor) { visitor.visit(*this); }
     void Arg::accept(Visitor &visitor) { visitor.visit(*this); }
     void Pars::accept(Visitor &visitor) { visitor.visit(*this); }
     void If_statement::accept(Visitor &visitor) { visitor.visit(*this); }

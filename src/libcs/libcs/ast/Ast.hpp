@@ -29,9 +29,7 @@ class Else_statement;
 class Return_statement;
 class Pars;
 class Func_def;
-
 class Assign_statement;
-
 class For_statement;
 class For_condition;
 class For_operation;
@@ -48,7 +46,7 @@ public:
 class Program final {
 private:
     std::vector<std::unique_ptr<Node>> members_;
-    Node *csclass_ptr_ = nullptr;
+    CSClass *csclass_ptr_;
 
 public:
     template <class T, class... Args> T *create_node(Args &&...args) {
@@ -56,8 +54,8 @@ public:
         members_.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
         return dynamic_cast<T *>(members_.back().get());
     }
-    void set_csclass(Node *csclass_ptr) { csclass_ptr_ = csclass_ptr; }
-    Node *get_csclass() { return csclass_ptr_; }
+    void set_csclass(CSClass *csclass_ptr) { csclass_ptr_ = csclass_ptr; }
+    CSClass *get_csclass() { return csclass_ptr_; }
 };
 
 
@@ -94,10 +92,12 @@ public:
 class Expressions final : public Node {
 private:
     Node* elem_;
+    int expr_flag_;
 
 public:
-    explicit Expressions(Node* elem) : elem_(elem) {}
+    explicit Expressions(Node* elem, int expr_flag) : elem_(elem), expr_flag_(std::move(expr_flag)) {}
     Node* get_elem() const { return elem_; }
+    int get_flag() const { return expr_flag_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -223,7 +223,7 @@ public:
     explicit Func_call(std::string func_name, Arguments* args)
         : func_name_(std::move(func_name)), args_(args) {}
     Arguments* get_args() const { return args_; }
-    std::string get_func_name() { return func_name_; }
+    std::string get_func_call_name() { return func_name_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -285,16 +285,16 @@ private:
 
 public:
     explicit Assign_statement(std::string id_left, std::vector<Arg*> arg_rigth)
-    : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth) {}
+    : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth)) {}
     explicit Assign_statement(std::string id_left, std::vector<Arg*> arg_rigth, std::string bin_op)
-    : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth), bin_op_(std::move(bin_op)) {}
+    : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
     explicit Assign_statement(std::string id_left, Func_call* func_call)
     : id_left_(std::move(id_left)), func_call_(func_call) {}
 
     explicit Assign_statement(Var_def* var_def, std::vector<Arg*> arg_rigth)
-    : var_def_(var_def), arg_rigth_(std::move(arg_rigth) {}
+    : var_def_(var_def), arg_rigth_(std::move(arg_rigth)) {}
     explicit Assign_statement(Var_def* var_def, std::vector<Arg*> arg_rigth, std::string bin_op)
-    : var_def_(var_def), arg_rigth_(std::move(arg_rigth), bin_op_(std::move(bin_op)) {}
+    : var_def_(var_def), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
     explicit Assign_statement(Var_def* var_def, Func_call* func_call)
     : var_def_(var_def), func_call_(func_call) {}
 
@@ -302,7 +302,7 @@ public:
     Var_def* get_var_def() const { return var_def_; }
     std::vector<Arg*> get_arg_rigth() const { return arg_rigth_; }
     std::string get_bin_op() { return bin_op_; }
-    Func_call* get_func_call() { return func_call_; }
+    Func_call* get_func_call() const { return func_call_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -311,9 +311,40 @@ public:
 
 class For_statement final : public Node {
 private:
+    Assign_statement* assign_;
+    For_condition* cond_;
+    For_operation* oper_;
+    Scope* scope_;
 
 public:
+    explicit For_statement(Assign_statement* assign, For_condition* cond, For_operation* oper, Scope* scope)
+    : assign_(assign), cond_(cond), oper_(oper), scope_(scope) {}
 
+    Assign_statement* get_assign() const { return assign_; }
+    For_condition* get_cond() const { return cond_; }
+    For_operation* get_oper() const { return oper_; }
+    Scope* get_scope() const { return scope_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class For_operation final : public Node {
+private:
+    std::string id_var_;
+    std::string unar_op_;
+    Assign_statement* assign_;
+
+public:
+    explicit For_operation(std::string id_var, std::string unar_op) : id_var_(std::move(id_var)), unar_op_(std::move(unar_op)) {}
+    explicit For_operation(Assign_statement* assign) : assign_(assign) {}
+
+    std::string get_for_id_var() { return id_var_; }
+    std::string get_for_unar_op() { return unar_op_; }
+    Assign_statement* get_for_assign() const { return assign_; }
+
+    void accept(Visitor& visitor) override;
 };
 
 

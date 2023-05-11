@@ -23,17 +23,17 @@ private:
 public:
     static void exec(Program &program, std::ostream &out);
     void visit(CSClass &node) override;
-    void visit([[maybe_unused]]Expression &node) override {}
-    void visit([[maybe_unused]]Expressions &node) override {}
-    void visit([[maybe_unused]]Assign_statement &node) override {}
-    void visit([[maybe_unused]]Literal &node) override {}
-    void visit([[maybe_unused]]Var_def &node) override {}
-    void visit([[maybe_unused]]Func_def &node) override {}
+    void visit(Expression &node) override;
+    void visit([[maybe_unused]]Expressions &node) override{}
+    void visit([[maybe_unused]]Assign_statement &node) override{}
+    void visit([[maybe_unused]]Literal &node) override{}
+    void visit([[maybe_unused]]Var_def &node) override{}
+    void visit([[maybe_unused]]Func_def &node) override{}
     void visit([[maybe_unused]]Scope &node) override {}
     void visit([[maybe_unused]]Return_statement &node) override {}
     void visit([[maybe_unused]]Statement &node) override {}
     void visit([[maybe_unused]]Func_call &node) override {}
-    void visit([[maybe_unused]]Args &node) override {}
+    void visit([[maybe_unused]]Arguments &node) override {}
     void visit([[maybe_unused]]Arg &node) override {}
     void visit([[maybe_unused]]Pars &node) override {}
     void visit([[maybe_unused]]If_statement &node) override {}
