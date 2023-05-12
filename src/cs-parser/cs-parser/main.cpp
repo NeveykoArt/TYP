@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
       if (!parser_result.errors_.empty()) {
         csharp::dump_errors(parser_result.errors_, std::cerr);
       } else {
+        std::cout << "printuem\n";
         csharp::dump_ast(parser_result.program_, std::cout);
       }
     }

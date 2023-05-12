@@ -92,12 +92,10 @@ public:
 class Expressions final : public Node {
 private:
     Node* elem_;
-    int expr_flag_;
 
 public:
-    explicit Expressions(Node* elem, int expr_flag) : elem_(elem), expr_flag_(std::move(expr_flag)) {}
+    explicit Expressions(Node* elem) : elem_(elem) {}
     Node* get_elem() const { return elem_; }
-    int get_flag() const { return expr_flag_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -120,12 +118,14 @@ public:
 
 class Var_def final : public Node {
 private:
-    std::string var_line_;
+    std::string var_type_;
+    std::string var_id_;
 
 public:
-    explicit Var_def(std::string var_line)
-        : var_line_(std::move(var_line)) {}
-    std::string get_var_line() { return var_line_; }
+    explicit Var_def(std::string var_type_tmp, std::string var_id)
+        : var_type_(std::move(var_type_tmp)), var_id_(std::move(var_id)) {}
+    std::string get_var_typ() { return var_type_; }
+    std::string get_var_id() { return var_id_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -246,7 +246,7 @@ public:
 
 class Func_def final : public Node {
 private:
-    std::vector<Kw_statement*> kw_;
+    std::vector<std::string> kw_;
     std::string var_;
     bool void_;
     std::string func_name_;
@@ -259,10 +259,10 @@ public:
     : void_(std::move(void_tmp)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
     explicit Func_def(std::string var, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
     : var_(std::move(var)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
-    explicit Func_def(std::vector<Kw_statement*> kw, bool void_tmp, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
+    explicit Func_def(std::vector<std::string> kw, bool void_tmp, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
     : kw_(std::move(kw)), void_(std::move(void_tmp)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
 
-    std::vector<Kw_statement*> get_kw() const { return kw_; }
+    std::vector<std::string> get_kw() const { return kw_; }
     std::string get_var() { return var_; }
     bool get_void() { return void_; }
     std::string get_func_name() { return func_name_; }
