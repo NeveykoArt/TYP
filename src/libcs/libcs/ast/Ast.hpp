@@ -34,6 +34,11 @@ class For_statement;
 class For_condition;
 class For_operation;
 
+class Mas_statement;
+class Mas_def;
+class Mas_selection;
+class Mas_change;
+
 class Node {
 public:
     virtual ~Node() = default;
@@ -46,7 +51,7 @@ public:
 class Program final {
 private:
     std::vector<std::unique_ptr<Node>> members_;
-    CSClass *csclass_ptr_;
+    CSClass *csclass_ptr_ = nullptr;
 
 public:
     template <class T, class... Args> T *create_node(Args &&...args) {
@@ -63,7 +68,7 @@ public:
 class CSClass final : public Node {
 private:
     std::string csclass_name_;
-    Expression* expression_;
+    Expression* expression_ = nullptr;
 
 public:
     explicit CSClass(std::string id, Expression* expression)
@@ -91,7 +96,7 @@ public:
 
 class Expressions final : public Node {
 private:
-    Node* elem_;
+    Node* elem_ = nullptr;
 
 public:
     explicit Expressions(Node* elem) : elem_(elem) {}
@@ -132,13 +137,109 @@ public:
 
 
 
-class Pars final : public Node {
+class Mas_selection final : public Node {
 private:
-    std::vector<Var_def *> defs_;
+    std::string var_type_;
+    std::string number_;
+    std::vector<Literal *> literal_;
 
 public:
-    explicit Pars(std::vector<Var_def *> defs) : defs_(std::move(defs)) {}
-    std::vector<Var_def *> get_pars() const { return defs_; }
+    explicit Mas_selection(std::string var_type_tmp, std::string number, std::vector<Literal *> literal)
+        : var_type_(std::move(var_type_tmp)), number_(std::move(number)), literal_(std::move(literal)) {}
+
+    std::string get_var_typ() { return var_type_; }
+    std::string get_number() { return number_; }
+    std::vector<Literal *> get_literal() { return literal_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class Mas_change final : public Node {
+private:
+    std::string change_id_;
+    std::string at_;
+
+public:
+    explicit Mas_change(std::string change_id, std::string at)
+        : change_id_(std::move(change_id)), at_(std::move(at)) {}
+    std::string get_change_id() { return change_id_; }
+    std::string get_at() { return at_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class Mas_def final : public Node {
+private:
+    std::string var_type_;
+    std::string var_id_;
+
+public:
+    explicit Mas_def(std::string var_type_tmp, std::string var_id)
+        : var_type_(std::move(var_type_tmp)), var_id_(std::move(var_id)) {}
+    std::string get_var_typ() { return var_type_; }
+    std::string get_var_id() { return var_id_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class Mas_statement final : public Node {
+private:
+    Mas_change* mas_change_ = nullptr;
+    Mas_def* mas_def_ = nullptr;
+    std::vector<Arg*> arg_rigth_;
+    std::string bin_op_;
+    Func_call* func_call_ = nullptr;
+    Mas_selection* mas_selection_ = nullptr;
+
+public:
+    explicit Mas_statement(Mas_change* mas_change, std::vector<Arg*> arg_rigth)
+    : mas_change_(std::move(mas_change)), arg_rigth_(std::move(arg_rigth)) {}
+    explicit Mas_statement(Mas_change* mas_change, std::vector<Arg*> arg_rigth, std::string bin_op)
+    : mas_change_(std::move(mas_change)), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
+    explicit Mas_statement(Mas_change* mas_change, Func_call* func_call)
+    : mas_change_(std::move(mas_change)), func_call_(func_call) {}
+    explicit Mas_statement(Mas_change* mas_change, Mas_selection* mas_selection)
+    : mas_change_(std::move(mas_change)), mas_selection_(mas_selection) {}
+
+    explicit Mas_statement(Mas_def* mas_def, std::vector<Arg*> arg_rigth)
+    : mas_def_(mas_def), arg_rigth_(std::move(arg_rigth)) {}
+    explicit Mas_statement(Mas_def* mas_def, std::vector<Arg*> arg_rigth, std::string bin_op)
+    : mas_def_(mas_def), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
+    explicit Mas_statement(Mas_def* mas_def, Func_call* func_call)
+    : mas_def_(mas_def), func_call_(func_call) {}
+    explicit Mas_statement(Mas_def* mas_def, Mas_selection* mas_selection)
+    : mas_def_(mas_def), mas_selection_(mas_selection) {}
+
+    Mas_change* get_mas_change() const { return mas_change_; }
+    Mas_def* get_mas_def() const { return mas_def_; }
+    std::vector<Arg*> get_arg_rigth() { return arg_rigth_; }
+    std::string get_bin_op() { return bin_op_; }
+    Func_call* get_func_call() const { return func_call_; }
+    Mas_selection* get_mas_selection() const { return mas_selection_; }
+
+    void accept(Visitor& visitor) override;
+};
+
+
+
+class Pars final : public Node {
+private:
+    std::vector<Var_def *> var_defs_;
+    std::vector<Mas_def *> mas_defs_;
+
+public:
+    explicit Pars(std::vector<Var_def *> defs) : var_defs_(std::move(defs)) {}
+    explicit Pars(std::vector<Mas_def *> defs) : mas_defs_(std::move(defs)) {}
+    explicit Pars(std::vector<Var_def *> var_defs, std::vector<Mas_def *> mas_defs)
+    : var_defs_(std::move(var_defs)), mas_defs_(std::move(mas_defs)) {}
+    std::vector<Var_def *> get_pars_var() const { return var_defs_; }
+    std::vector<Mas_def *> get_pars_mas() const { return mas_defs_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -147,7 +248,7 @@ public:
 
 class Statement final : public Node {
 private:
-    Node* elem_;
+    Node* elem_ = nullptr;
 
 public:
     explicit Statement(Node* elem) : elem_(elem) {}
@@ -187,12 +288,15 @@ public:
 class Arg final : public Node {
 private:
     std::string arg_id_;
-    Literal* arg_;
+    Literal* arg_ = nullptr;
+    Mas_change* arg_mas_ = nullptr;
 
 public:
     explicit Arg(std::string arg_id) : arg_id_(std::move(arg_id)) {}
     explicit Arg(Literal* arg) : arg_(arg) {}
+    explicit Arg(Mas_change* arg_mas) : arg_mas_(arg_mas) {}
     Literal* get_arg() const { return arg_; }
+    Mas_change* get_arg_mas() const { return arg_mas_; }
     std::string get_arg_id() { return arg_id_; }
 
     void accept(Visitor& visitor) override;
@@ -203,11 +307,15 @@ public:
 class Literal final : public Node {
 private:
     std::string literal_;
+    bool bool_flag_ = false;
 
 public:
     explicit Literal(std::string literal)
         : literal_(std::move(literal)) {}
+    explicit Literal(bool bool_flag)
+        : bool_flag_(std::move(bool_flag)) {}
     std::string get_literal() { return literal_; }
+    bool get_bool_flag() { return bool_flag_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -217,13 +325,14 @@ public:
 class Func_call final : public Node {
 private:
     std::string func_name_;
-    Arguments* args_;
+    Arguments* args_ = nullptr;
 
 public:
     explicit Func_call(std::string func_name, Arguments* args)
         : func_name_(std::move(func_name)), args_(args) {}
     Arguments* get_args() const { return args_; }
     std::string get_func_call_name() { return func_name_; }
+    bool isempty() { return func_name_.empty(); }
 
     void accept(Visitor& visitor) override;
 };
@@ -232,7 +341,7 @@ public:
 
 class Return_statement final : public Node {
 private:
-    Arg* arg_;
+    Arg* arg_ = nullptr;
 
 public:
     explicit Return_statement(Arg* arg)
@@ -248,11 +357,11 @@ class Func_def final : public Node {
 private:
     std::vector<std::string> kw_;
     std::string var_;
-    bool void_;
+    bool void_ = false;
     std::string func_name_;
-    Pars* pars_;
-    Scope* scope_;
-    Return_statement* return_;
+    Pars* pars_ = nullptr;
+    Scope* scope_ = nullptr;
+    Return_statement* return_ = nullptr;
 
 public:
     explicit Func_def(bool void_tmp, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
@@ -261,6 +370,8 @@ public:
     : var_(std::move(var)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
     explicit Func_def(std::vector<std::string> kw, bool void_tmp, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
     : kw_(std::move(kw)), void_(std::move(void_tmp)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
+    explicit Func_def(std::vector<std::string> kw, std::string var, std::string func_name, Pars* pars, Scope* scope, Return_statement* return_tmp)
+    : kw_(std::move(kw)), var_(std::move(var)), func_name_(std::move(func_name)), pars_(pars), scope_(scope), return_(return_tmp) {}
 
     std::vector<std::string> get_kw() const { return kw_; }
     std::string get_var() { return var_; }
@@ -278,10 +389,11 @@ public:
 class Assign_statement final : public Node {
 private:
     std::string id_left_;
-    Var_def* var_def_;
+    Var_def* var_def_ = nullptr;
     std::vector<Arg*> arg_rigth_;
     std::string bin_op_;
-    Func_call* func_call_;
+    Func_call* func_call_ = nullptr;
+    Mas_selection* mas_selection_ = nullptr;
 
 public:
     explicit Assign_statement(std::string id_left, std::vector<Arg*> arg_rigth)
@@ -290,6 +402,8 @@ public:
     : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
     explicit Assign_statement(std::string id_left, Func_call* func_call)
     : id_left_(std::move(id_left)), func_call_(func_call) {}
+    explicit Assign_statement(std::string id_left, Mas_selection* mas_selection)
+    : id_left_(std::move(id_left)), mas_selection_(mas_selection) {}
 
     explicit Assign_statement(Var_def* var_def, std::vector<Arg*> arg_rigth)
     : var_def_(var_def), arg_rigth_(std::move(arg_rigth)) {}
@@ -297,12 +411,15 @@ public:
     : var_def_(var_def), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
     explicit Assign_statement(Var_def* var_def, Func_call* func_call)
     : var_def_(var_def), func_call_(func_call) {}
+    explicit Assign_statement(Var_def* var_def, Mas_selection* mas_selection)
+    : var_def_(var_def), mas_selection_(mas_selection) {}
 
     std::string get_id_left() { return id_left_; }
     Var_def* get_var_def() const { return var_def_; }
     std::vector<Arg*> get_arg_rigth() const { return arg_rigth_; }
     std::string get_bin_op() { return bin_op_; }
     Func_call* get_func_call() const { return func_call_; }
+    Mas_selection* get_mas_selection() { return mas_selection_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -311,10 +428,10 @@ public:
 
 class For_statement final : public Node {
 private:
-    Assign_statement* assign_;
-    For_condition* cond_;
-    For_operation* oper_;
-    Scope* scope_;
+    Assign_statement* assign_ = nullptr;
+    For_condition* cond_ = nullptr;
+    For_operation* oper_ = nullptr;
+    Scope* scope_ = nullptr;
 
 public:
     explicit For_statement(Assign_statement* assign, For_condition* cond, For_operation* oper, Scope* scope)
@@ -334,7 +451,7 @@ class For_operation final : public Node {
 private:
     std::string id_var_;
     std::string unar_op_;
-    Assign_statement* assign_;
+    Assign_statement* assign_ = nullptr;
 
 public:
     explicit For_operation(std::string id_var, std::string unar_op) : id_var_(std::move(id_var)), unar_op_(std::move(unar_op)) {}
@@ -353,9 +470,9 @@ class If_statement final : public Node {
 private:
     std::string arg1_;
     std::string logic_op_;
-    Arg* arg2_;
-    Scope* scope_;
-    Else_statement* else_;
+    Arg* arg2_ = nullptr;
+    Scope* scope_ = nullptr;
+    Else_statement* else_ = nullptr;
 
 public:
     explicit If_statement(std::string arg1, Scope* scope) : arg1_(std::move(arg1)), scope_(scope) {}
@@ -377,7 +494,7 @@ public:
 
 class Else_statement final : public Node {
 private:
-    Scope* scope_;
+    Scope* scope_ = nullptr;
 
 public:
     explicit Else_statement(Scope* scope)
@@ -393,7 +510,7 @@ class For_condition final : public Node {
 private:
     std::string arg1_;
     std::string logic_op_;
-    Arg* arg2_;
+    Arg* arg2_ = nullptr;
 
 public:
     explicit For_condition(std::string arg1, std::string logic_op, Arg* arg2)
@@ -410,12 +527,12 @@ public:
 
 class Read_statement final : public Node {
 private:
-    std::string read_;
+    Arg* arg_ = nullptr;
 
 public:
-    explicit Read_statement(std::string read)
-        : read_(std::move(read)) {}
-    std::string get_read() { return read_; }
+    explicit Read_statement(Arg* arg)
+        : arg_(arg) {}
+    Arg* get_read() { return arg_; }
 
     void accept(Visitor& visitor) override;
 };
@@ -424,12 +541,12 @@ public:
 
 class Print_statement final : public Node {
 private:
-    std::string print_;
+    Arg* arg_ = nullptr;
 
 public:
-    explicit Print_statement(std::string print)
-        : print_(std::move(print)) {}
-    std::string get_print() { return print_; }
+    explicit Print_statement(Arg* arg)
+        : arg_(arg) {}
+    Arg* get_print() { return arg_; }
 
     void accept(Visitor& visitor) override;
 };

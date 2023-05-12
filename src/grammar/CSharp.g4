@@ -3,25 +3,36 @@ grammar CSharp;
 program: class EOF;
 class: CLASS ID CLB expression CRB;
 expression: (expressions)*;
-expressions: ( func_def | (assign_statement SEMICOLON) | if_statement | for_statement | print_statement | read_statement);
-assign_statement: (ID | var_def) (
+expressions: ( func_def | (assign_statement SEMICOLON) | (mas_statement SEMICOLON) | if_statement | for_statement | print_statement | read_statement);
+mas_statement: (mas_def | mas_change) (
 				ASSIGN (
 					(arg (BINARY_OP arg)?)
-					| func_call
+					| func_call | mas_selection
 				       )
 				)?;
-literal: TEXT | NUMBER | CHARv | FLOAT_NUMBER;
-var_def: VAR ID | VAR SLP SRP ID;
-func_def: (VAR | (KEYWORD* VOID) | VOID) ID RLP pars RRP (CLB scope return_statement CRB);
+assign_statement: (ID | var_def) (ASSIGN ((arg (BINARY_OP arg)?)| func_call | mas_selection))?;
+literal: TEXT | NUMBER | CHARv | FLOAT | true_ | false_;
+
+true_: TRUE_;
+false_: FALSE_;
+
+mas_selection: NEW VAR SLP (length)? SRP (CLB (literal (COMMA literal)*) CRB)?;
+mas_change: ID SLP length SRP;
+length: number | ID;
+number: NUMBER;
+mas_def: VAR SLP SRP ID;
+var_def: VAR ID;
+
+func_def: (((KEYWORD*)? VAR) | ((KEYWORD*)? VOID)) ID RLP pars RRP (CLB scope return_statement CRB);
 scope: (statement)*;
-return_statement: RETURN arg SEMICOLON;
+return_statement: RETURN (arg)? SEMICOLON;
 statement: (func_call SEMICOLON)
-	| (assign_statement SEMICOLON)
+	| (assign_statement SEMICOLON) | (mas_statement SEMICOLON)
 	| if_statement | for_statement | (kw_statement SEMICOLON) | print_statement | read_statement;
 func_call: (ID | WRITELN | READLN) RLP args RRP;
 args: (arg (COMMA arg)*)?;
-arg: ID | literal;
-pars: (var_def (COMMA var_def)*)?;
+arg: ID | literal | mas_change;
+pars: ((var_def | mas_def) (COMMA (var_def | mas_def))*)?;
 if_statement:
 	IF RLP ID (LOGIC_OP arg)? RRP CLB scope CRB (else_statement)?;
 else_statement: ELSE CLB scope CRB;
@@ -29,8 +40,8 @@ for_statement: FOR RLP assign_statement SEMICOLON for_condition SEMICOLON for_op
 for_condition: ID LOGIC_OP arg;
 for_operation: (ID UNARYMATHEXP) | assign_statement;
 kw_statement: KEYWORD;
-print_statement: WRITELN RLP ID RRP SEMICOLON;
-read_statement: READLN RLP ID RRP SEMICOLON;
+print_statement: WRITELN RLP arg RRP SEMICOLON;
+read_statement: READLN RLP arg RRP SEMICOLON;
 
 KEYWORD:
 	'abstract'
@@ -49,7 +60,6 @@ KEYWORD:
 	| 'event'
 	| 'explicit'
 	| 'extern'
-	| 'false'
 	| 'finally'
 	| 'fixed'
 	| 'foreach'
@@ -60,7 +70,6 @@ KEYWORD:
 	| 'internal'
 	| 'lock'
 	| 'namespace'
-	| 'new'
 	| 'null'
 	| 'object'
 	| 'operator'
@@ -80,7 +89,6 @@ KEYWORD:
 	| 'switch'
 	| 'this'
 	| 'throw'
-	| 'true'
 	| 'try'
 	| 'typeof'
 	| 'unchecked'
@@ -93,6 +101,7 @@ KEYWORD:
 CLASS: 'class';
 RETURN: 'return';
 VOID: 'void';
+NEW: 'new';
 
 VAR:
 	INT
@@ -125,8 +134,8 @@ STRING: 'string' | 'System.String';
 CHAR: 'char';
 BOOL: 'bool';
 
-WRITELN: 'WriteLine';
-READLN: 'ReadLine';
+WRITELN: 'Console.WriteLine';
+READLN: 'Console.ReadLine';
 IF: 'if';
 ELSE: 'else';
 FOR: 'for';
@@ -167,6 +176,9 @@ NUMBER: ('0' | [1-9] [0-9]*);
 TEXT: DQUOTES [A-Za-z0-9!?@#$%^&* ,.]+ DQUOTES;
 CHARv: APOSTROPH [A-Za-z0-9!?@#$%^&*.] APOSTROPH;
 FLOAT_NUMBER: NUMBER DOT NUMBER;
+
+TRUE_: 'true';
+FALSE_: 'false';
 
 fragment DIGITNOZERO: [1-9];
 

@@ -1,4 +1,4 @@
 class Program
 {
-int i = 2 + 2;
+int i = 2;
 }

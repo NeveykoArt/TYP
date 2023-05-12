@@ -5,8 +5,12 @@ namespace csharp::ast {
     void CSClass::accept(Visitor &visitor) { visitor.visit(*this); }
     void Expression::accept(Visitor &visitor) { visitor.visit(*this); }
     void Expressions::accept(Visitor &visitor) { visitor.visit(*this); }
+    void Mas_statement::accept(Visitor &visitor) { visitor.visit(*this); }
     void Assign_statement::accept(Visitor &visitor) { visitor.visit(*this); }
     void Literal::accept(Visitor &visitor) { visitor.visit(*this); }
+    void Mas_def::accept(Visitor &visitor) { visitor.visit(*this); }
+    void Mas_selection::accept(Visitor &visitor) { visitor.visit(*this); }
+    void Mas_change::accept(Visitor &visitor) { visitor.visit(*this); }
     void Var_def::accept(Visitor &visitor) { visitor.visit(*this); }
     void Func_def::accept(Visitor &visitor) { visitor.visit(*this); }
     void Scope::accept(Visitor &visitor) { visitor.visit(*this); }

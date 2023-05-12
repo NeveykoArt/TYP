@@ -9,7 +9,7 @@
 
 namespace csharp::test {
 
-  /*
+/*
 static size_t count_indentation(const std::string& str) {
   const auto it = std::find_if_not(
       str.begin(), str.end(), [](char ch) { return std::isspace(ch); });
