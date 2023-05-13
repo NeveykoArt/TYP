@@ -312,8 +312,8 @@ private:
 public:
     explicit Literal(std::string literal)
         : literal_(std::move(literal)) {}
-    explicit Literal(bool bool_flag)
-        : bool_flag_(std::move(bool_flag)) {}
+    explicit Literal(std::string literal, bool bool_flag)
+        : literal_(std::move(literal)), bool_flag_(std::move(bool_flag)) {}
     std::string get_literal() { return literal_; }
     bool get_bool_flag() { return bool_flag_; }
 

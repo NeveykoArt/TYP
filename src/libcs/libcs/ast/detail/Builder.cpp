@@ -178,9 +178,11 @@ std::any Builder::visitAssign_statement(CSharpParser::Assign_statementContext *c
 
 std::any Builder::visitLiteral(CSharpParser::LiteralContext *context) {
     if (context->true_() != nullptr) {
-        return static_cast<Node*>(program_.create_node<Literal>(true));
+        bool t = true;
+        return static_cast<Node*>(program_.create_node<Literal>("", t));
     } else if (context->false_() != nullptr) {
-        return static_cast<Node*>(program_.create_node<Literal>(false));
+        bool f = false;
+        return static_cast<Node*>(program_.create_node<Literal>("", f));
     }
     return static_cast<Node*>(program_.create_node<Literal>(normalize_register(context->getText())));
 }
@@ -305,17 +307,7 @@ std::any Builder::visitStatement(CSharpParser::StatementContext *context)  {
 
 std::any Builder::visitFunc_call(CSharpParser::Func_callContext *context)  {
     auto* value = dynamic_cast<Arguments *>(std::any_cast<Node*>(visit(context->args())));
-    std::string func_name;
-    if (context->ID() != nullptr) {
-        func_name = context->ID()->getText();
-    }
-    if (context->WRITELN() != nullptr) {
-        func_name = "Console.WriteLine";
-    }
-    if (context->READLN() != nullptr) {
-        func_name = "Console.ReadLine";
-    }
-    return static_cast<Node*>(program_.create_node<Func_call>(func_name, value));
+    return static_cast<Node*>(program_.create_node<Func_call>(context->ID()->getText(), value));
 }
 
 std::any Builder::visitArgs(CSharpParser::ArgsContext *context)  {

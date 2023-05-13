@@ -56,7 +56,6 @@ void Serializer::visit(Func_def &node) {
         node.get_pars()->accept(*this);
         node.get_scope()->accept(*this);
         node.get_return()->accept(*this);
-        nodes_.pop();
     nodes_.pop();
 }
 
@@ -92,30 +91,36 @@ void Serializer::visit(Assign_statement &node) {
         if (node.get_var_def() != nullptr) {
             node.get_var_def()->accept(*this);
         } else {
-            append_text(node.get_id_left().c_str());
+            auto arg = append_child("arg");
+            nodes_.push(arg);
+                auto idheader = append_child("id");
+                nodes_.push(idheader);
+                    append_text(node.get_id_left().c_str());
+                nodes_.pop();
+            nodes_.pop();
         }
         nodes_.pop();
-        if (!node.get_arg_rigth().empty() || node.get_func_call() != nullptr) {
+        if (!node.get_arg_rigth().empty() || node.get_func_call() != nullptr || node.get_mas_selection() != nullptr) {
             auto rightside = append_child("rightside");
             nodes_.push(rightside);
             if (node.get_func_call() != nullptr) {
                 node.get_func_call()->accept(*this);
+            } else if (node.get_mas_selection() != nullptr) {
+                node.get_mas_selection()->accept(*this);
+            } else if (!node.get_bin_op().empty()) {
+                auto binop = append_child("binary_op");
+                nodes_.push(binop);
+                auto op_typ = append_child("op_type");
+                nodes_.push(op_typ);
+                    append_text(node.get_bin_op().c_str());
+                nodes_.pop();
+                for (auto *c : node.get_arg_rigth()) {
+                    c->accept(*this);
+                }
+                nodes_.pop();
             } else {
-                if (!node.get_bin_op().empty()) {
-                    auto binop = append_child("binary_op");
-                    nodes_.push(binop);
-                    auto op_typ = append_child("op_type");
-                    nodes_.push(op_typ);
-                        append_text(node.get_bin_op().c_str());
-                    nodes_.pop();
-                    for (auto *c : node.get_arg_rigth()) {
-                        c->accept(*this);
-                    }
-                    nodes_.pop();
-                } else {
-                    for (auto *c : node.get_arg_rigth()) {
-                        c->accept(*this);
-                    }
+                for (auto *c : node.get_arg_rigth()) {
+                    c->accept(*this);
                 }
             }
             nodes_.pop();
@@ -413,7 +418,17 @@ void Serializer::visit(Arg &node) {
 void Serializer::visit(Literal &node) {
     auto header = append_child("literal");
     nodes_.push(header);
+    if (!node.get_literal().empty()) {
         append_text(node.get_literal().c_str());
+    } else {
+        if (node.get_bool_flag()) {
+            std::string t = "true";
+            append_text(t.c_str());
+        } else {
+            std::string f = "false";
+            append_text(f.c_str());
+        }
+    }
     nodes_.pop();
 }
 

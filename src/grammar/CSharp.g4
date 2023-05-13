@@ -11,10 +11,12 @@ mas_statement: (mas_def | mas_change) (
 				       )
 				)?;
 assign_statement: (ID | var_def) (ASSIGN ((arg (BINARY_OP arg)?)| func_call | mas_selection))?;
-literal: TEXT | NUMBER | CHARv | FLOAT | true_ | false_;
 
+literal: TEXT | NUMBER | CHARv | FLOAT_NUMBER | true_ | false_;
 true_: TRUE_;
 false_: FALSE_;
+TRUE_: 'true';
+FALSE_: 'false';
 
 mas_selection: NEW VAR SLP (length)? SRP (CLB (literal (COMMA literal)*) CRB)?;
 mas_change: ID SLP length SRP;
@@ -29,7 +31,7 @@ return_statement: RETURN (arg)? SEMICOLON;
 statement: (func_call SEMICOLON)
 	| (assign_statement SEMICOLON) | (mas_statement SEMICOLON)
 	| if_statement | for_statement | (kw_statement SEMICOLON) | print_statement | read_statement;
-func_call: (ID | WRITELN | READLN) RLP args RRP;
+func_call: ID RLP args RRP;
 args: (arg (COMMA arg)*)?;
 arg: ID | literal | mas_change;
 pars: ((var_def | mas_def) (COMMA (var_def | mas_def))*)?;
@@ -176,9 +178,6 @@ NUMBER: ('0' | [1-9] [0-9]*);
 TEXT: DQUOTES [A-Za-z0-9!?@#$%^&* ,.]+ DQUOTES;
 CHARv: APOSTROPH [A-Za-z0-9!?@#$%^&*.] APOSTROPH;
 FLOAT_NUMBER: NUMBER DOT NUMBER;
-
-TRUE_: 'true';
-FALSE_: 'false';
 
 fragment DIGITNOZERO: [1-9];
 
