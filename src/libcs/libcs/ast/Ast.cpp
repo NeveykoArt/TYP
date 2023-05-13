@@ -10,6 +10,7 @@ namespace csharp::ast {
     void Literal::accept(Visitor &visitor) { visitor.visit(*this); }
     void Mas_def::accept(Visitor &visitor) { visitor.visit(*this); }
     void Mas_selection::accept(Visitor &visitor) { visitor.visit(*this); }
+    void Length::accept(Visitor &visitor) { visitor.visit(*this); }
     void Mas_change::accept(Visitor &visitor) { visitor.visit(*this); }
     void Var_def::accept(Visitor &visitor) { visitor.visit(*this); }
     void Func_def::accept(Visitor &visitor) { visitor.visit(*this); }

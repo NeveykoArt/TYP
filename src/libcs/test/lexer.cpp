@@ -23,7 +23,7 @@ TEST(LexerSuite, ValidNumbers) {
 
 TEST(LexerSuite, StringTokens) {
   // Given
-  std::stringstream in("abc");
+  std::stringstream in("\"abc\"");
 
   // When
   std::stringstream out;
@@ -32,7 +32,7 @@ TEST(LexerSuite, StringTokens) {
   // Then
   EXPECT_EQ(
       out.str(),
-      "Loc=<1:0>\tID 'abc'\n");
+      "Loc=<1:0>\tTEXT '\"abc\"'\n");
 }
 
 TEST(LexerSuite, CharTokens) {

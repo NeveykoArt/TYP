@@ -141,7 +141,7 @@ READLN: 'Console.ReadLine';
 IF: 'if';
 ELSE: 'else';
 FOR: 'for';
-ID: SYMBOL (SYMBOL | DIGIT | '.' SYMBOL)*;
+ID: SYMBOL (SYMBOL | DIGIT | '.' SYMBOL | '_')*;
 fragment SYMBOL: [A-Za-z];
 fragment DIGIT: [0-9];
 UNARYMATHEXP: '++' | '--';
@@ -175,7 +175,7 @@ APOSTROPH: '\'';
 DQUOTES: '"';
 NUMBER: ('0' | [1-9] [0-9]*);
 
-TEXT: DQUOTES [A-Za-z0-9!?@#$%^&* ,.]+ DQUOTES;
+TEXT: DQUOTES [A-Za-z0-9!?@#$%^&* ,._]+ DQUOTES;
 CHARv: APOSTROPH [A-Za-z0-9!?@#$%^&*.] APOSTROPH;
 FLOAT_NUMBER: NUMBER DOT NUMBER;
 

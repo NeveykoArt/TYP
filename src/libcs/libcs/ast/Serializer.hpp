@@ -45,6 +45,7 @@ public:
     void visit(For_statement &node) override;
     void visit(For_condition &node) override;
     void visit(For_operation &node) override;
+    void visit([[maybe_unused]]Length &node) override {}
     void visit([[maybe_unused]]Kw_statement &node) override {}
     void visit(Print_statement &node) override;
     void visit(Read_statement &node) override;

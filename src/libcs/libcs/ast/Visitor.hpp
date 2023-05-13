@@ -32,6 +32,7 @@ class Visitor {
     virtual void visit(Kw_statement &node) = 0;
     virtual void visit(Print_statement &node) = 0;
     virtual void visit(Read_statement &node) = 0;
+    virtual void visit(Length &node) = 0;
 };
 
 }  // namespace csharp::ast

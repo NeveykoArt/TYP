@@ -188,10 +188,11 @@ std::any Builder::visitLiteral(CSharpParser::LiteralContext *context) {
 }
 
 std::any Builder::visitMas_change(CSharpParser::Mas_changeContext *context) {
-    if (context->length()->number() != nullptr) {
-        return static_cast<Node*>(program_.create_node<Mas_change>(context->ID()->getText(), context->length()->number()->getText()));
+    Length* leng = nullptr;
+    if (context->length() != nullptr) {
+        leng = dynamic_cast<Length *>(std::any_cast<Node*>(visit(context->length())));
     }
-    return static_cast<Node*>(program_.create_node<Mas_change>(context->ID()->getText(), context->length()->ID()->getText()));
+    return static_cast<Node*>(program_.create_node<Mas_change>(context->ID()->getText(), leng));
 }
 
 std::any Builder::visitMas_selection(CSharpParser::Mas_selectionContext *context) {
@@ -199,10 +200,15 @@ std::any Builder::visitMas_selection(CSharpParser::Mas_selectionContext *context
     for (auto* el : context->literal()) {
         lits.push_back(dynamic_cast<Literal *>(std::any_cast<Node*>(visit(el))));
     }
-    if (context->length()->number() != nullptr) {
-        return static_cast<Node*>(program_.create_node<Mas_selection>(context->VAR()->getText(), context->length()->number()->getText(), lits));
+    Length* leng = nullptr;
+    if (context->length() != nullptr) {
+        leng = dynamic_cast<Length *>(std::any_cast<Node*>(visit(context->length())));
     }
-    return static_cast<Node*>(program_.create_node<Mas_selection>(context->VAR()->getText(), context->length()->ID()->getText(), lits));
+    return static_cast<Node*>(program_.create_node<Mas_selection>(context->VAR()->getText(), leng, lits));
+}
+
+std::any Builder::visitLength(CSharpParser::LengthContext *context) {
+    return static_cast<Node*>(program_.create_node<Length>(normalize_register(context->getText())));
 }
 
 std::any Builder::visitMas_def(CSharpParser::Mas_defContext *context) {

@@ -33,7 +33,7 @@ class Assign_statement;
 class For_statement;
 class For_condition;
 class For_operation;
-
+class Length;
 class Mas_statement;
 class Mas_def;
 class Mas_selection;
@@ -140,32 +140,43 @@ public:
 class Mas_selection final : public Node {
 private:
     std::string var_type_;
-    std::string number_;
+    Length* length_ = nullptr;
     std::vector<Literal *> literal_;
 
 public:
-    explicit Mas_selection(std::string var_type_tmp, std::string number, std::vector<Literal *> literal)
-        : var_type_(std::move(var_type_tmp)), number_(std::move(number)), literal_(std::move(literal)) {}
+    explicit Mas_selection(std::string var_type_tmp, Length* length, std::vector<Literal *> literal)
+        : var_type_(std::move(var_type_tmp)), length_(std::move(length)), literal_(std::move(literal)) {}
 
     std::string get_var_typ() { return var_type_; }
-    std::string get_number() { return number_; }
+    Length* get_length() { return length_; }
     std::vector<Literal *> get_literal() { return literal_; }
 
     void accept(Visitor& visitor) override;
 };
 
+class Length final : public Node {
+private:
+    std::string id_number_;
 
+public:
+    explicit Length(std::string id_number)
+        : id_number_(std::move(id_number)) {}
+
+    std::string get_id_number() { return id_number_; }
+
+    void accept(Visitor& visitor) override;
+};
 
 class Mas_change final : public Node {
 private:
     std::string change_id_;
-    std::string at_;
+    Length* at_ = nullptr;
 
 public:
-    explicit Mas_change(std::string change_id, std::string at)
+    explicit Mas_change(std::string change_id, Length* at)
         : change_id_(std::move(change_id)), at_(std::move(at)) {}
     std::string get_change_id() { return change_id_; }
-    std::string get_at() { return at_; }
+    Length* get_at() { return at_; }
 
     void accept(Visitor& visitor) override;
 };

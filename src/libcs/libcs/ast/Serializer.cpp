@@ -343,10 +343,15 @@ void Serializer::visit(Mas_selection &node) {
         auto typheader = append_child("type");
         nodes_.push(typheader);
             append_text(node.get_var_typ().c_str());
-        nodes_.pop();
-        auto sbraks = append_child("sq_brakets");
-        nodes_.push(sbraks);
-            append_text(node.get_number().c_str());
+            if (node.get_length()!=nullptr) {
+                auto sbraks = append_child("sq_brakets");
+                nodes_.push(sbraks);
+                    append_text(node.get_length()->get_id_number().c_str());
+                nodes_.pop();
+            } else {
+                std::string br = "[]";
+                append_text(br.c_str());
+            }
         nodes_.pop();
         if (!node.get_literal().empty()) {
             auto braces = append_child("braces");
@@ -368,10 +373,15 @@ void Serializer::visit(Mas_change &node) {
         nodes_.pop();
         auto idheader = append_child("at");
         nodes_.push(idheader);
-            auto sbraks = append_child("sq_brakets");
-            nodes_.push(sbraks);
-                append_text(node.get_at().c_str());
-            nodes_.pop();
+            if (node.get_at()!=nullptr) {
+                auto sbraks = append_child("sq_brakets");
+                nodes_.push(sbraks);
+                    append_text(node.get_at()->get_id_number().c_str());
+                nodes_.pop();
+            } else {
+                std::string br = "[]";
+                append_text(br.c_str());
+            }
         nodes_.pop();
     nodes_.pop();
 }
