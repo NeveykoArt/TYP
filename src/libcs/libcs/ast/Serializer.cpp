@@ -100,28 +100,15 @@ void Serializer::visit(Assign_statement &node) {
             nodes_.pop();
         }
         nodes_.pop();
-        if (!node.get_arg_rigth().empty() || node.get_func_call() != nullptr || node.get_mas_selection() != nullptr) {
+        if (node.get_operation() != nullptr || node.get_func_call() != nullptr || node.get_mas_selection() != nullptr) {
             auto rightside = append_child("rightside");
             nodes_.push(rightside);
             if (node.get_func_call() != nullptr) {
                 node.get_func_call()->accept(*this);
             } else if (node.get_mas_selection() != nullptr) {
                 node.get_mas_selection()->accept(*this);
-            } else if (!node.get_bin_op().empty()) {
-                auto binop = append_child("binary_op");
-                nodes_.push(binop);
-                auto op_typ = append_child("op_type");
-                nodes_.push(op_typ);
-                    append_text(node.get_bin_op().c_str());
-                nodes_.pop();
-                for (auto *c : node.get_arg_rigth()) {
-                    c->accept(*this);
-                }
-                nodes_.pop();
-            } else {
-                for (auto *c : node.get_arg_rigth()) {
-                    c->accept(*this);
-                }
+            } else if (node.get_operation() != nullptr) {
+                node.get_operation()->accept(*this);
             }
             nodes_.pop();
         }
@@ -139,32 +126,50 @@ void Serializer::visit(Mas_statement &node) {
             node.get_mas_def()->accept(*this);
         }
         nodes_.pop();
-        if (!node.get_arg_rigth().empty() || node.get_func_call() != nullptr || node.get_mas_selection() != nullptr) {
+        if (node.get_operation() != nullptr || node.get_func_call() != nullptr || node.get_mas_selection() != nullptr) {
             auto rightside = append_child("rightside");
             nodes_.push(rightside);
             if (node.get_func_call() != nullptr) {
                 node.get_func_call()->accept(*this);
             } else if (node.get_mas_selection() != nullptr) {
                 node.get_mas_selection()->accept(*this);
-            } else if (!node.get_bin_op().empty()) {
-                auto binop = append_child("binary_op");
-                nodes_.push(binop);
-                auto op_typ = append_child("op_type");
-                nodes_.push(op_typ);
-                    append_text(node.get_bin_op().c_str());
-                nodes_.pop();
-                for (auto *c : node.get_arg_rigth()) {
-                    c->accept(*this);
-                }
-                nodes_.pop();
-            } else {
-                for (auto *c : node.get_arg_rigth()) {
-                    c->accept(*this);
-                }
+            } else if (node.get_operation() != nullptr) {
+                node.get_operation()->accept(*this);
             }
             nodes_.pop();
         }
     nodes_.pop();
+}
+
+void Serializer::visit(Operation &node) {
+    if (node.get_brackets()) {
+        auto braces = append_child("braces");
+        nodes_.push(braces);
+    }
+    bool op_visited = false;
+
+    if (node.get_arg() == nullptr) {
+        for (const auto &operand : node.get_operands()) {
+            operand->accept(*this);
+            if (!op_visited && !node.get_operation().empty()) {
+                op_visited = true;
+                auto binop = append_child("binary_op");
+                nodes_.push(binop);
+                    append_text(node.get_operation().c_str());
+                nodes_.pop();
+            }
+        }
+    } else {
+        auto sig = append_child("sign");
+        nodes_.push(sig);
+            append_text(node.get_sign().c_str());
+        nodes_.pop();
+        node.get_arg()->accept(*this);
+    }
+
+    if (node.get_brackets()) {
+        nodes_.pop();
+    }
 }
 
 void Serializer::visit(If_statement &node) {

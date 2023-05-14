@@ -7,6 +7,7 @@ namespace csharp::ast {
     void Expressions::accept(Visitor &visitor) { visitor.visit(*this); }
     void Mas_statement::accept(Visitor &visitor) { visitor.visit(*this); }
     void Assign_statement::accept(Visitor &visitor) { visitor.visit(*this); }
+    void Operation::accept(Visitor &visitor) { visitor.visit(*this); }
     void Literal::accept(Visitor &visitor) { visitor.visit(*this); }
     void Mas_def::accept(Visitor &visitor) { visitor.visit(*this); }
     void Mas_selection::accept(Visitor &visitor) { visitor.visit(*this); }
