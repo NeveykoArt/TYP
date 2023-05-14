@@ -83,14 +83,22 @@ std::any Builder::visitMas_statement(CSharpParser::Mas_statementContext *context
             auto* f_c =
             dynamic_cast<Func_call*>(std::any_cast<Node*>(visit(context->func_call())));
             return static_cast<Node*>(program_.create_node<Mas_statement>(m_d, f_c));
-        } else if (context->operation() != nullptr) {
-            auto* o_p =
-            dynamic_cast<Operation*>(std::any_cast<Node*>(visit(context->operation())));
-            return static_cast<Node*>(program_.create_node<Mas_statement>(m_d, o_p));
+        } else if (context->BINARY_OP() != nullptr) {
+            std::vector<Arg *> exprs;
+            for (auto* el : context->arg()) {
+                exprs.push_back(dynamic_cast<Arg *>(std::any_cast<Node*>(visit(el))));
+            }
+            return static_cast<Node*>(program_.create_node<Mas_statement>(m_d, exprs, context->BINARY_OP()->getText()));
         } else if (context->mas_selection() != nullptr) {
             auto* m_s =
             dynamic_cast<Mas_selection*>(std::any_cast<Node*>(visit(context->mas_selection())));
             return static_cast<Node*>(program_.create_node<Mas_statement>(m_d, m_s));
+        }else {
+            std::vector<Arg *> exprs;
+            for (auto* el : context->arg()) {
+                exprs.push_back(dynamic_cast<Arg *>(std::any_cast<Node*>(visit(el))));
+            }
+            return static_cast<Node*>(program_.create_node<Mas_statement>(m_d, exprs));
         }
     } else {
         auto* m_c =
@@ -99,14 +107,18 @@ std::any Builder::visitMas_statement(CSharpParser::Mas_statementContext *context
             auto* f_c =
             dynamic_cast<Func_call*>(std::any_cast<Node*>(visit(context->func_call())));
             return static_cast<Node*>(program_.create_node<Mas_statement>(m_c, f_c));
-        } else if (context->operation() != nullptr) {
-            auto* o_p =
-            dynamic_cast<Operation*>(std::any_cast<Node*>(visit(context->operation())));
-            return static_cast<Node*>(program_.create_node<Mas_statement>(m_c, o_p));
-        } else if (context->mas_selection() != nullptr) {
-            auto* m_s =
-            dynamic_cast<Mas_selection*>(std::any_cast<Node*>(visit(context->mas_selection())));
-            return static_cast<Node*>(program_.create_node<Mas_statement>(m_c, m_s));
+        } else if (context->BINARY_OP() != nullptr) {
+            std::vector<Arg *> exprs;
+            for (auto* el : context->arg()) {
+                exprs.push_back(dynamic_cast<Arg *>(std::any_cast<Node*>(visit(el))));
+            }
+            return static_cast<Node*>(program_.create_node<Mas_statement>(m_c, exprs, context->BINARY_OP()->getText()));
+        } else {
+            std::vector<Arg *> exprs;
+            for (auto* el : context->arg()) {
+                exprs.push_back(dynamic_cast<Arg *>(std::any_cast<Node*>(visit(el))));
+            }
+            return static_cast<Node*>(program_.create_node<Mas_statement>(m_c, exprs));
         }
     }
     return 0;
@@ -120,14 +132,22 @@ std::any Builder::visitAssign_statement(CSharpParser::Assign_statementContext *c
             auto* f_c =
             dynamic_cast<Func_call*>(std::any_cast<Node*>(visit(context->func_call())));
             return static_cast<Node*>(program_.create_node<Assign_statement>(v_d, f_c));
-        } else if (context->operation() != nullptr) {
-            auto* o_p =
-            dynamic_cast<Operation*>(std::any_cast<Node*>(visit(context->operation())));
-            return static_cast<Node*>(program_.create_node<Assign_statement>(v_d, o_p));
+        } else if (context->BINARY_OP() != nullptr) {
+            std::vector<Arg *> exprs;
+            for (auto* el : context->arg()) {
+                exprs.push_back(dynamic_cast<Arg *>(std::any_cast<Node*>(visit(el))));
+            }
+            return static_cast<Node*>(program_.create_node<Assign_statement>(v_d, exprs, context->BINARY_OP()->getText()));
         } else if (context->mas_selection() != nullptr) {
-            auto* m_s =
+            auto* m_c =
             dynamic_cast<Mas_selection*>(std::any_cast<Node*>(visit(context->mas_selection())));
-            return static_cast<Node*>(program_.create_node<Assign_statement>(v_d, m_s));
+            return static_cast<Node*>(program_.create_node<Assign_statement>(v_d, m_c));
+        } else {
+            std::vector<Arg *> exprs;
+            for (auto* el : context->arg()) {
+                exprs.push_back(dynamic_cast<Arg *>(std::any_cast<Node*>(visit(el))));
+            }
+            return static_cast<Node*>(program_.create_node<Assign_statement>(v_d, exprs));
         }
     } else {
         auto id_left = context->ID()->getText();
@@ -135,42 +155,25 @@ std::any Builder::visitAssign_statement(CSharpParser::Assign_statementContext *c
             auto* f_c =
             dynamic_cast<Func_call*>(std::any_cast<Node*>(visit(context->func_call())));
             return static_cast<Node*>(program_.create_node<Assign_statement>(id_left, f_c));
-        } else if (context->operation() != nullptr) {
-            auto* o_p =
-            dynamic_cast<Operation*>(std::any_cast<Node*>(visit(context->operation())));
-            return static_cast<Node*>(program_.create_node<Assign_statement>(id_left, o_p));
+        } else if (context->BINARY_OP() != nullptr) {
+            std::vector<Arg *> exprs;
+            for (auto* el : context->arg()) {
+                exprs.push_back(dynamic_cast<Arg *>(std::any_cast<Node*>(visit(el))));
+            }
+            return static_cast<Node*>(program_.create_node<Assign_statement>(id_left, exprs, context->BINARY_OP()->getText()));
         } else if (context->mas_selection() != nullptr) {
-            auto* m_s =
+            auto* m_c =
             dynamic_cast<Mas_selection*>(std::any_cast<Node*>(visit(context->mas_selection())));
-            return static_cast<Node*>(program_.create_node<Assign_statement>(id_left, m_s));
+            return static_cast<Node*>(program_.create_node<Assign_statement>(id_left, m_c));
+        } else {
+            std::vector<Arg *> exprs;
+            for (auto* el : context->arg()) {
+                exprs.push_back(dynamic_cast<Arg *>(std::any_cast<Node*>(visit(el))));
+            }
+            return static_cast<Node*>(program_.create_node<Assign_statement>(id_left, exprs));
         }
     }
     return 0;
-}
-
-std::any Builder::visitOperation(CSharpParser::OperationContext *context) {
-    std::vector<Operation*> operands;
-    std::string operation = "";
-    std::string sign;
-    Arg *arg = nullptr;
-    bool brackets = context->RLP() != nullptr;
-    if (context->arg() == nullptr) {
-        if (!brackets) {
-            operation = context->BINARY_OP()->getText();
-        }
-        for (const auto &operand : context->operation()) {
-            operands.push_back(dynamic_cast<Operation *>(
-                std::any_cast<Node *>(visit(operand))));
-        }
-    } else {
-        for (const auto *signs : context->SIGN()) {
-            sign += signs->getText();
-        }
-        arg = dynamic_cast<Arg *>(
-            std::any_cast<Node *>(visit(context->arg())));
-    }
-    return static_cast<Node *>(program_.create_node<Operation>(
-        operands, operation, sign, arg, brackets));
 }
 
 std::any Builder::visitLiteral(CSharpParser::LiteralContext *context) {

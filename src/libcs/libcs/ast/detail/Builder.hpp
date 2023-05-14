@@ -19,7 +19,6 @@ class Builder final : public CSharpBaseVisitor {
   antlrcpp::Any visitExpressions(CSharpParser::ExpressionsContext *context) override;
   antlrcpp::Any visitMas_statement(CSharpParser::Mas_statementContext *context) override;
   antlrcpp::Any visitAssign_statement(CSharpParser::Assign_statementContext *context) override;
-  antlrcpp::Any visitOperation(CSharpParser::OperationContext *context) override;
   antlrcpp::Any visitLiteral(CSharpParser::LiteralContext *context) override;
   antlrcpp::Any visitLength(CSharpParser::LengthContext *context) override;
   antlrcpp::Any visitMas_change(CSharpParser::Mas_changeContext *context) override;

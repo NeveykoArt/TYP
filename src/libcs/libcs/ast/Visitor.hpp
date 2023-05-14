@@ -10,7 +10,6 @@ class Visitor {
     virtual void visit(Expression &node) = 0;
     virtual void visit(Expressions &node) = 0;
     virtual void visit(Assign_statement &node) = 0;
-    virtual void visit(Operation &node) = 0;
     virtual void visit(Mas_statement &node) = 0;
     virtual void visit(Literal &node) = 0;
     virtual void visit(Mas_selection &node) = 0;

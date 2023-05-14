@@ -1,5 +1,50 @@
 grammar CSharp;
 
+program: class EOF;
+class: CLASS ID CLB expression CRB;
+expression: (expressions)*;
+expressions: ( func_def | (assign_statement SEMICOLON) | (mas_statement SEMICOLON) | if_statement | for_statement | print_statement | read_statement);
+mas_statement: (mas_def | mas_change) (
+				ASSIGN (
+					(arg (BINARY_OP arg)?)
+					| func_call | mas_selection
+				       )
+				)?;
+assign_statement: (ID | var_def) (ASSIGN ((arg (BINARY_OP arg)?)| func_call | mas_selection))?;
+
+literal: TEXT | NUMBER | CHARv | FLOAT_NUMBER | true_ | false_;
+true_: TRUE_;
+false_: FALSE_;
+TRUE_: 'true';
+FALSE_: 'false';
+
+mas_selection: NEW VAR SLP (length)? SRP (CLB (literal (COMMA literal)*) CRB)?;
+mas_change: ID SLP length SRP;
+length: number | ID;
+number: NUMBER;
+mas_def: VAR SLP SRP ID;
+var_def: VAR ID;
+
+func_def: (((KEYWORD*)? VAR) | ((KEYWORD*)? VOID)) ID RLP pars RRP (CLB scope return_statement CRB);
+scope: (statement)*;
+return_statement: RETURN (arg)? SEMICOLON;
+statement: (func_call SEMICOLON)
+	| (assign_statement SEMICOLON) | (mas_statement SEMICOLON)
+	| if_statement | for_statement | (kw_statement SEMICOLON) | print_statement | read_statement;
+func_call: ID RLP args RRP;
+args: (arg (COMMA arg)*)?;
+arg: ID | literal | mas_change;
+pars: ((var_def | mas_def) (COMMA (var_def | mas_def))*)?;
+if_statement:
+	IF RLP ID (LOGIC_OP arg)? RRP CLB scope CRB (else_statement)?;
+else_statement: ELSE CLB scope CRB;
+for_statement: FOR RLP assign_statement SEMICOLON for_condition SEMICOLON for_operation RRP CLB scope CRB;
+for_condition: ID LOGIC_OP arg;
+for_operation: (ID UNARYMATHEXP) | assign_statement;
+kw_statement: KEYWORD;
+print_statement: WRITELN RLP arg RRP SEMICOLON;
+read_statement: READLN RLP arg RRP SEMICOLON;
+
 KEYWORD:
 	'abstract'
 	| 'as'
@@ -96,14 +141,11 @@ READLN: 'Console.ReadLine';
 IF: 'if';
 ELSE: 'else';
 FOR: 'for';
-ID: SYMBOL (SYMBOL | DIGIT | '_')*;
+ID: SYMBOL (SYMBOL | DIGIT | '.' SYMBOL | '_')*;
 fragment SYMBOL: [A-Za-z];
 fragment DIGIT: [0-9];
 UNARYMATHEXP: '++' | '--';
 ASSIGN: '=';
-
-SIGN: PLUS | MINUS;
-
 BINARY_OP: PLUS | MINUS | PERS | DIVISION | MUL;
 fragment MUL: '*';
 fragment DIVISION: '/';
@@ -132,60 +174,12 @@ COMMA: ',';
 APOSTROPH: '\'';
 DQUOTES: '"';
 NUMBER: ('0' | [1-9] [0-9]*);
-TRUE_: 'true';
-FALSE_: 'false';
 
-TEXT: DQUOTES [A-Za-z0-9!?@#$%^&* ,.]+ DQUOTES;
+TEXT: DQUOTES [A-Za-z0-9!?@#$%^&* ,._]+ DQUOTES;
 CHARv: APOSTROPH [A-Za-z0-9!?@#$%^&*.] APOSTROPH;
 FLOAT_NUMBER: NUMBER DOT NUMBER;
 
 fragment DIGITNOZERO: [1-9];
 
+
 WS: [ \r\t\n]+ -> skip;
-
-program: class EOF;
-class: CLASS ID CLB expression CRB;
-expression: expressions*;
-
-expressions: func_def | (assign_statement SEMICOLON) | (mas_statement SEMICOLON) | if_statement | for_statement | print_statement | read_statement;
-
-func_def: ((KEYWORD*)? VAR) | ((KEYWORD*)? VOID) ID RLP pars RRP CLB scope return_statement CRB;
-assign_statement: (ID | var_def) (ASSIGN operation | func_call | mas_selection)?;
-mas_statement: (mas_def | mas_change) (ASSIGN operation | func_call | mas_selection)?;
-if_statement:
-	IF RLP ID (LOGIC_OP arg)? RRP CLB scope CRB (else_statement)?;
-for_statement: FOR RLP assign_statement SEMICOLON for_condition SEMICOLON for_operation RRP CLB scope CRB;
-print_statement: WRITELN RLP arg RRP SEMICOLON;
-read_statement: READLN RLP arg RRP SEMICOLON;
-
-statement: (func_call SEMICOLON)| (assign_statement SEMICOLON) | (mas_statement SEMICOLON)| if_statement | for_statement | (kw_statement SEMICOLON) | print_statement | read_statement;
-
-operation: 
-	operation BINARY_OP operation
-	| RLP operation RRP
-	| SIGN* arg;
-
-literal: TEXT | NUMBER | CHARv | FLOAT_NUMBER | true_ | false_;
-
-true_: TRUE_;
-false_: FALSE_;
-
-mas_selection: NEW VAR SLP (length)? SRP (CLB (literal (COMMA literal)*) CRB)?;
-mas_change: ID SLP length SRP;
-
-length: number | ID;
-number: NUMBER;
-mas_def: VAR SLP SRP ID;
-var_def: VAR ID;
-
-scope: statement*;
-return_statement: RETURN (arg)? SEMICOLON;
-
-func_call: ID RLP args RRP;
-args: (arg (COMMA arg)*)?;
-arg: ID | literal | mas_change;
-pars: ((var_def | mas_def) (COMMA (var_def | mas_def))*)?;
-else_statement: ELSE CLB scope CRB;
-for_condition: ID LOGIC_OP arg;
-for_operation: (ID UNARYMATHEXP) | assign_statement;
-kw_statement: KEYWORD;

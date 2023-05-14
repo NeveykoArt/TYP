@@ -38,7 +38,6 @@ class Mas_statement;
 class Mas_def;
 class Mas_selection;
 class Mas_change;
-class Operation;
 
 class Node {
 public:
@@ -204,20 +203,25 @@ class Mas_statement final : public Node {
 private:
     Mas_change* mas_change_ = nullptr;
     Mas_def* mas_def_ = nullptr;
+    std::vector<Arg*> arg_rigth_;
+    std::string bin_op_;
     Func_call* func_call_ = nullptr;
     Mas_selection* mas_selection_ = nullptr;
-    Operation* operation_ = nullptr;
 
 public:
-    explicit Mas_statement(Mas_change* mas_change, Operation* operation)
-    : mas_change_(mas_change), operation_(operation) {}
+    explicit Mas_statement(Mas_change* mas_change, std::vector<Arg*> arg_rigth)
+    : mas_change_(std::move(mas_change)), arg_rigth_(std::move(arg_rigth)) {}
+    explicit Mas_statement(Mas_change* mas_change, std::vector<Arg*> arg_rigth, std::string bin_op)
+    : mas_change_(std::move(mas_change)), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
     explicit Mas_statement(Mas_change* mas_change, Func_call* func_call)
-    : mas_change_(mas_change), func_call_(func_call) {}
+    : mas_change_(std::move(mas_change)), func_call_(func_call) {}
     explicit Mas_statement(Mas_change* mas_change, Mas_selection* mas_selection)
-    : mas_change_(mas_change), mas_selection_(mas_selection) {}
+    : mas_change_(std::move(mas_change)), mas_selection_(mas_selection) {}
 
-    explicit Mas_statement(Mas_def* mas_def, Operation* operation)
-    : mas_def_(mas_def), operation_(operation) {}
+    explicit Mas_statement(Mas_def* mas_def, std::vector<Arg*> arg_rigth)
+    : mas_def_(mas_def), arg_rigth_(std::move(arg_rigth)) {}
+    explicit Mas_statement(Mas_def* mas_def, std::vector<Arg*> arg_rigth, std::string bin_op)
+    : mas_def_(mas_def), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
     explicit Mas_statement(Mas_def* mas_def, Func_call* func_call)
     : mas_def_(mas_def), func_call_(func_call) {}
     explicit Mas_statement(Mas_def* mas_def, Mas_selection* mas_selection)
@@ -225,7 +229,8 @@ public:
 
     Mas_change* get_mas_change() const { return mas_change_; }
     Mas_def* get_mas_def() const { return mas_def_; }
-    Operation* get_operation() const { return operation_; }
+    std::vector<Arg*> get_arg_rigth() { return arg_rigth_; }
+    std::string get_bin_op() { return bin_op_; }
     Func_call* get_func_call() const { return func_call_; }
     Mas_selection* get_mas_selection() const { return mas_selection_; }
 
@@ -396,20 +401,25 @@ class Assign_statement final : public Node {
 private:
     std::string id_left_;
     Var_def* var_def_ = nullptr;
-    Operation* operation_ = nullptr;
+    std::vector<Arg*> arg_rigth_;
+    std::string bin_op_;
     Func_call* func_call_ = nullptr;
     Mas_selection* mas_selection_ = nullptr;
 
 public:
-    explicit Assign_statement(std::string id_left, Operation* operation)
-    : id_left_(std::move(id_left)), operation_(operation) {}
+    explicit Assign_statement(std::string id_left, std::vector<Arg*> arg_rigth)
+    : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth)) {}
+    explicit Assign_statement(std::string id_left, std::vector<Arg*> arg_rigth, std::string bin_op)
+    : id_left_(std::move(id_left)), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
     explicit Assign_statement(std::string id_left, Func_call* func_call)
     : id_left_(std::move(id_left)), func_call_(func_call) {}
     explicit Assign_statement(std::string id_left, Mas_selection* mas_selection)
     : id_left_(std::move(id_left)), mas_selection_(mas_selection) {}
 
-    explicit Assign_statement(Var_def* var_def, Operation* operation)
-    : var_def_(var_def), operation_(operation) {}
+    explicit Assign_statement(Var_def* var_def, std::vector<Arg*> arg_rigth)
+    : var_def_(var_def), arg_rigth_(std::move(arg_rigth)) {}
+    explicit Assign_statement(Var_def* var_def, std::vector<Arg*> arg_rigth, std::string bin_op)
+    : var_def_(var_def), arg_rigth_(std::move(arg_rigth)), bin_op_(std::move(bin_op)) {}
     explicit Assign_statement(Var_def* var_def, Func_call* func_call)
     : var_def_(var_def), func_call_(func_call) {}
     explicit Assign_statement(Var_def* var_def, Mas_selection* mas_selection)
@@ -417,34 +427,12 @@ public:
 
     std::string get_id_left() { return id_left_; }
     Var_def* get_var_def() const { return var_def_; }
-    Operation* get_operation() const { return operation_; }
+    std::vector<Arg*> get_arg_rigth() const { return arg_rigth_; }
+    std::string get_bin_op() { return bin_op_; }
     Func_call* get_func_call() const { return func_call_; }
-    Mas_selection* get_mas_selection () const { return mas_selection_; }
+    Mas_selection* get_mas_selection() { return mas_selection_; }
 
     void accept(Visitor& visitor) override;
-};
-
-
-
-class Operation final : public Node {
-private:
-    std::vector<Operation *> operands_;
-    std::string operation_;
-    std::string sign_;
-    Arg *arg_ = nullptr;
-    bool brackets_;
-
-public:
-    Operation(std::vector<Operation *> operands, std::string operation, std::string sign, Arg *arg, bool brackets)
-    : operands_(std::move(operands)), operation_(std::move(operation)), sign_(std::move(sign)), arg_(arg), brackets_(brackets) {}
-
-    std::vector<Operation *> get_operands() { return operands_; }
-    std::string get_operation(){ return operation_; }
-    std::string get_sign(){ return sign_; }
-    Arg* get_arg() const { return arg_; }
-    bool get_brackets(){ return brackets_; }
-
-    void accept(Visitor &visitor) override;
 };
 
 

@@ -27,7 +27,6 @@ public:
     void visit([[maybe_unused]]Expressions &node) override {}
     void visit(Mas_statement &node) override;
     void visit(Assign_statement &node) override;
-    void visit(Operation &node) override;
     void visit(Literal &node) override;
     void visit(Mas_def &node) override;
     void visit(Mas_selection &node) override;
