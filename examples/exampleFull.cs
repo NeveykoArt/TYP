@@ -6,8 +6,8 @@ class Program
 	}
 	int e = 2;
 	int[] f;
-	int[] g = new int[5];
-	int[] h = new int[5]{1,2,3,4,5};
+	int[] g = new int[]{1,2,3,4,5};
+	char[] h = new char[5]{'a', 'b', 'c', 'd', 'e'};
 	static void Main(string[] args)
 	{
 		int a = 2 + 3;
@@ -24,7 +24,7 @@ class Program
 			Console.WriteLine("aboba");
 		}
 		for (int i = 0; i < 5; i++) {
-			int j = h[i];
+			int j = g[i];
 			Console.WriteLine(j);
 		}
 		Console.WriteLine(c);

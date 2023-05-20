@@ -322,15 +322,13 @@ public:
 class Literal final : public Node {
 private:
     std::string literal_;
-    bool bool_flag_ = false;
+    std::string var_type_;
 
 public:
-    explicit Literal(std::string literal)
-        : literal_(std::move(literal)) {}
-    explicit Literal(std::string literal, bool bool_flag)
-        : literal_(std::move(literal)), bool_flag_(std::move(bool_flag)) {}
+    explicit Literal(std::string literal, std::string var_typ)
+        : literal_(std::move(literal)), var_type_(var_typ) {}
     std::string get_literal() { return literal_; }
-    bool get_bool_flag() { return bool_flag_; }
+    std::string get_var_typ() { return var_type_; }
 
     void accept(Visitor& visitor) override;
 };

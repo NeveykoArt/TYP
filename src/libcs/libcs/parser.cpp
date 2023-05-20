@@ -68,7 +68,6 @@ void dump_table(ast::SymbolTable &symb_tab) {
   for (auto &el : symb_tab) {
     std::cout << std::setw(15) << std::left << el.get_table_typ() << "|" << std::setw(20) << el.get_obj_name()
     << "|" << std::setw(10) << el.get_var_typ() << "|" << std::setw(15) << el.get_scope_level() << "\n";
-    //std::cout << fmt::format("\t{} \t\t| {} \t| {} \t| {}\n", el.get_table_typ(), el.get_obj_name(), el.get_var_typ(), el.get_scope_level());
   }
 }
 

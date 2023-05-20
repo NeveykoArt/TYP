@@ -1,5 +1,7 @@
 #include <libcs/ast/SymbolTable.hpp>
 #include <iostream>
+#include <string>
+#include <regex>
 
 namespace csharp::ast {
 
@@ -28,6 +30,24 @@ bool SymbolTableVisitor::contains(const std::string &elem, std::size_t &scop_lvl
     return false;
 }
 
+std::string SymbolTableVisitor::functype() {
+    for (auto el = global_table_.rbegin(); el != global_table_.rend(); ++el) {
+        if ((el->get_table_typ() == "function")) {
+            return el->get_var_typ();
+        }
+    }
+    return "";
+}
+
+std::string SymbolTableVisitor::getTypeOf(const std::string &elem) {
+    for (auto el : global_table_) {
+        if (el.get_obj_name() == elem) {
+            return el.get_var_typ();
+        }
+    }
+    return "";
+}
+
 SymbolTable SymbolTableVisitor::exec(Program &program) {
     SymbolTableVisitor table_visitor;
     program.get_csclass()->accept(table_visitor);
@@ -43,6 +63,10 @@ void SymbolTableVisitor::visit(CSClass &node) {
 }
 
 void SymbolTableVisitor::visit(Expression &node) {
+    if (node.get_exprs().empty()) {
+        throw SemanticError(
+            "Empty class");
+    }
     for (auto *c : node.get_exprs()) {
         c->get_elem()->accept(*this);
     }
@@ -65,6 +89,7 @@ void SymbolTableVisitor::visit(Func_def &node) {
     global_table_.push_back(Symbol(TableType::Scope, funcname, "-", scope_lvl+1));
     node.get_pars()->accept(*this);
     node.get_scope()->accept(*this);
+    node.get_return()->accept(*this);
     global_table_.push_back(Symbol(TableType::Scope, "--------", "--------", scope_lvl+1));
 }
 
@@ -79,6 +104,35 @@ void SymbolTableVisitor::visit(Print_statement &node) {
 void SymbolTableVisitor::visit(Assign_statement &node) {
     if (node.get_var_def() != nullptr) {
         node.get_var_def()->accept(*this);
+        if (!node.get_arg_rigth().empty()) {
+            for (auto *c : node.get_arg_rigth()) {
+                if (c->get_arg() != nullptr) {
+                    if (c->get_arg()->get_var_typ() != node.get_var_def()->get_var_typ()) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_var_def()->get_var_id() + "'");
+                    }
+                }
+                if (c->get_arg_mas() != nullptr) {
+                    if (getTypeOf(c->get_arg_mas()->get_change_id()) != node.get_var_def()->get_var_typ()) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_var_def()->get_var_id() + "'");
+                    }
+                }
+                if (c->get_arg_id() != "") {
+                    if (getTypeOf(c->get_arg_id()) != node.get_var_def()->get_var_typ()) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_var_def()->get_var_id() + "'");
+                    }
+                }
+                c->accept(*this);
+            }
+        }
+        if (node.get_func_call() != nullptr) {
+            if (getTypeOf(node.get_func_call()->get_func_call_name()) != node.get_var_def()->get_var_typ()) {
+                throw SemanticError(
+                    "Not matched types for variable '" + node.get_var_def()->get_var_id() + "'");
+            }
+        }
     } else {
         std::string id = node.get_id_left();
         std::size_t scope_lvl = getScopeLvl();
@@ -86,8 +140,40 @@ void SymbolTableVisitor::visit(Assign_statement &node) {
             throw SemanticError(
                 "Not declarated variable '" + id + "'");
         }
+        if (!node.get_arg_rigth().empty()) {
+            for (auto *c : node.get_arg_rigth()) {
+                if (c->get_arg() != nullptr) {
+                    if (c->get_arg()->get_var_typ() != getTypeOf(node.get_id_left())) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_id_left() + "'");
+                    }
+                }
+                if (c->get_arg_mas() != nullptr) {
+                    if (getTypeOf(c->get_arg_mas()->get_change_id()) != getTypeOf(node.get_id_left())) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_id_left() + "'");
+                    }
+                }
+                if (c->get_arg_id() != "") {
+                    if (getTypeOf(c->get_arg_id()) != getTypeOf(node.get_id_left())) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_id_left() + "'");
+                    }
+                }
+            }
+        }
+        if (node.get_func_call() != nullptr) {
+            if (getTypeOf(node.get_func_call()->get_func_call_name()) != getTypeOf(node.get_id_left())) {
+                throw SemanticError(
+                    "Not matched types for variable '" + node.get_id_left() + "'");
+            }
+        }
+        if (node.get_mas_selection() != nullptr) {
+            node.get_mas_selection()->accept(*this);
+        }
     }
     if (node.get_func_call() != nullptr) {
+
         node.get_func_call()->accept(*this);
     }
     if (!node.get_arg_rigth().empty()) {
@@ -100,8 +186,67 @@ void SymbolTableVisitor::visit(Assign_statement &node) {
 void SymbolTableVisitor::visit(Mas_statement &node) {
     if (node.get_mas_change() != nullptr) {
         node.get_mas_change()->accept(*this);
+        if (node.get_func_call() != nullptr) {
+            if (getTypeOf(node.get_func_call()->get_func_call_name()) != getTypeOf(node.get_mas_change()->get_change_id())) {
+                throw SemanticError(
+                    "Not matched types for variable '" + node.get_mas_change()->get_change_id() + "'");
+            }
+        }
+        if (!node.get_arg_rigth().empty()) {
+            for (auto *c : node.get_arg_rigth()) {
+                if (c->get_arg() != nullptr) {
+                    if (c->get_arg()->get_var_typ() != getTypeOf(node.get_mas_change()->get_change_id())) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_mas_change()->get_change_id() + "'");
+                    }
+                }
+                if (c->get_arg_mas() != nullptr) {
+                    if (getTypeOf(c->get_arg_mas()->get_change_id()) != getTypeOf(node.get_mas_change()->get_change_id())) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_mas_change()->get_change_id() + "'");
+                    }
+                }
+                if (c->get_arg_id() != "") {
+                    if (getTypeOf(c->get_arg_id()) != getTypeOf(node.get_mas_change()->get_change_id())) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_mas_change()->get_change_id() + "'");
+                    }
+                }
+            }
+        }
     } else {
         node.get_mas_def()->accept(*this);
+        if (!node.get_arg_rigth().empty()) {
+            for (auto *c : node.get_arg_rigth()) {
+                if (c->get_arg() != nullptr) {
+                    if (c->get_arg()->get_var_typ() != node.get_mas_def()->get_var_typ()) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_mas_def()->get_var_id() + "'");
+                    }
+                }
+                if (c->get_arg_mas() != nullptr) {
+                    if (getTypeOf(c->get_arg_mas()->get_change_id()) != node.get_mas_def()->get_var_typ()) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_mas_def()->get_var_id() + "'");
+                    }
+                }
+                if (c->get_arg_id() != "") {
+                    if (getTypeOf(c->get_arg_id()) != node.get_mas_def()->get_var_typ()) {
+                        throw SemanticError(
+                            "Not matched types for variable '" + node.get_mas_def()->get_var_id() + "'");
+                    }
+                }
+            }
+        }
+        if (node.get_func_call() != nullptr) {
+            if (getTypeOf(node.get_func_call()->get_func_call_name()) != node.get_mas_def()->get_var_typ()) {
+                throw SemanticError(
+                    "Not matched types for variable '" + node.get_mas_def()->get_var_id() + "'");
+            }
+        }
+        if (node.get_mas_selection() != nullptr) {
+            node.get_mas_selection()->accept(*this);
+        }
     }
     if (node.get_func_call() != nullptr) {
         node.get_func_call()->accept(*this);
@@ -121,6 +266,10 @@ void SymbolTableVisitor::visit(If_statement &node) {
             "Not declarated variable '" + id + "'");
     }
     if (!node.get_if_log_op().empty()) {
+        if (getTypeOf(id) != getTypeOf(node.get_if_2_arg()->get_arg_id())) {
+            throw SemanticError(
+                "Not matched arguments in if statement");
+        }
         node.get_if_2_arg()->accept(*this);
     }
     global_table_.push_back(Symbol(TableType::Scope, "if", "-", scope_lvl+1));
@@ -156,6 +305,10 @@ void SymbolTableVisitor::visit(For_operation &node) {
             throw SemanticError(
                 "Not declarated variable '" + id + "'");
         }
+        if (getTypeOf(id) != "int") {
+            throw SemanticError(
+                "Not matched for argument '" + id + "'");
+        }
     } else {
         node.get_for_assign()->accept(*this);
     }
@@ -164,9 +317,27 @@ void SymbolTableVisitor::visit(For_operation &node) {
 void SymbolTableVisitor::visit(For_condition &node) {
     std::string id = node.get_for_cond_1_arg();
     std::size_t scope_lvl = getScopeLvl();
-        if (!contains(id, scope_lvl)) {
+    if (!contains(id, scope_lvl)) {
         throw SemanticError(
             "Not declarated variable '" + id + "'");
+    }
+    if (node.get_for_cond_2_arg()->get_arg_id() != "") {
+        if (getTypeOf(id) != getTypeOf(node.get_for_cond_2_arg()->get_arg_id())) {
+            throw SemanticError(
+                "Not matched arguments in for statement");
+        }
+    }
+    if (node.get_for_cond_2_arg()->get_arg() != nullptr) {
+        if (getTypeOf(id) != node.get_for_cond_2_arg()->get_arg()->get_var_typ()) {
+            throw SemanticError(
+                "Not matched arguments in for statement");
+        }
+    }
+    if (node.get_for_cond_2_arg()->get_arg_mas() != nullptr) {
+        if (getTypeOf(id) != getTypeOf(node.get_for_cond_2_arg()->get_arg_mas()->get_change_id())) {
+            throw SemanticError(
+                "Not matched arguments in for statement");
+        }
     }
     node.get_for_cond_2_arg()->accept(*this);
 }
@@ -191,9 +362,14 @@ void SymbolTableVisitor::visit(Scope &node) {
 }
 
 void SymbolTableVisitor::visit(Return_statement &node) {
-    if (node.get_return_arg() != nullptr) {
-        node.get_return_arg()->accept(*this);
+    if (functype() == "void" && node.get_return_arg() != nullptr) {
+        throw SemanticError(
+            "Void function can`t return anything");
     }
+    if (node.get_return_arg() != nullptr) {
+            node.get_return_arg()->accept(*this);
+    }
+
 }
 
 void SymbolTableVisitor::visit(Var_def &node) {
@@ -216,6 +392,24 @@ void SymbolTableVisitor::visit(Mas_def &node) {
     global_table_.push_back(Symbol(TableType::Array, id, node.get_var_typ(), scope_lvl));
 }
 
+void SymbolTableVisitor::visit(Mas_selection &node) {
+    if (global_table_.back().get_var_typ() != node.get_var_typ()) {
+        throw SemanticError(
+            "Incompatible type of array '" + global_table_.back().get_obj_name() + "'");
+    }
+    if (node.get_length() != nullptr) {
+            node.get_length()->accept(*this);
+    }
+    if (!node.get_literal().empty()) {
+        for (auto *c : node.get_literal()) {
+            if (c->get_var_typ() != global_table_.back().get_var_typ()) {
+                throw SemanticError(
+                    "Not matched companets for array");
+            }
+        }
+    }
+}
+
 void SymbolTableVisitor::visit(Mas_change &node) {
     std::string id = node.get_change_id();
     std::size_t scope_lvl = getScopeLvl();
@@ -223,15 +417,18 @@ void SymbolTableVisitor::visit(Mas_change &node) {
         throw SemanticError(
             "Not declarated massive '" + id + "'");
     }
-    node.get_at()->accept(*this);
+    if (node.get_at() != nullptr)
+        node.get_at()->accept(*this);
 }
 
 void SymbolTableVisitor::visit(Length &node) {
     std::string id = node.get_id_number();
     std::size_t scope_lvl = getScopeLvl();
-    if (!contains(id, scope_lvl)) {
-        throw SemanticError(
-            "Not declarated var '" + id + "'");
+    if (id.find_first_not_of("0123456789") != std::string::npos) {
+        if (!contains(id, scope_lvl)) {
+            throw SemanticError(
+                "Not declarated var '" + id + "'");
+        }
     }
 }
 

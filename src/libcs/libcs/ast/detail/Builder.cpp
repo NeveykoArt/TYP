@@ -158,13 +158,23 @@ std::any Builder::visitAssign_statement(CSharpParser::Assign_statementContext *c
 
 std::any Builder::visitLiteral(CSharpParser::LiteralContext *context) {
     if (context->true_() != nullptr) {
-        bool t = true;
-        return static_cast<Node*>(program_.create_node<Literal>("", t));
+        return static_cast<Node*>(program_.create_node<Literal>("true", "bool"));
     } else if (context->false_() != nullptr) {
-        bool f = false;
-        return static_cast<Node*>(program_.create_node<Literal>("", f));
+        return static_cast<Node*>(program_.create_node<Literal>("false", "bool"));
     }
-    return static_cast<Node*>(program_.create_node<Literal>(normalize_register(context->getText())));
+    if (context->TEXT() != nullptr) {
+        return static_cast<Node*>(program_.create_node<Literal>(normalize_register(context->getText()), "string"));
+    }
+    if (context->NUMBER() != nullptr) {
+        return static_cast<Node*>(program_.create_node<Literal>(normalize_register(context->getText()), "int"));
+    }
+    if (context->CHARv() != nullptr) {
+        return static_cast<Node*>(program_.create_node<Literal>(normalize_register(context->getText()), "char"));
+    }
+    if (context->FLOAT_NUMBER() != nullptr) {
+        return static_cast<Node*>(program_.create_node<Literal>(normalize_register(context->getText()), "float"));
+    }
+    return static_cast<Node*>(program_.create_node<Literal>(normalize_register(context->getText()), ""));
 }
 
 std::any Builder::visitMas_change(CSharpParser::Mas_changeContext *context) {

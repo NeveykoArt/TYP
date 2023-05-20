@@ -59,7 +59,7 @@ public:
     void visit(Assign_statement &node) override;
     void visit([[maybe_unused]]Literal &node) override {}
     void visit(Mas_def &node) override;
-    void visit([[maybe_unused]]Mas_selection &node) override {}
+    void visit(Mas_selection &node) override;
     void visit(Mas_change &node) override;
     void visit(Var_def &node) override;
     void visit(Func_def &node) override;
@@ -83,6 +83,8 @@ public:
     SymbolTable get_symbol_table() { return global_table_; };
     std::size_t getScopeLvl();
     bool contains(const std::string &elem, std::size_t &scop_lvl);
+    std::string functype();
+    std::string getTypeOf(const std::string &elem);
 };
 
 } //namespace csharp::ast

@@ -430,14 +430,6 @@ void Serializer::visit(Literal &node) {
     nodes_.push(header);
     if (!node.get_literal().empty()) {
         append_text(node.get_literal().c_str());
-    } else {
-        if (node.get_bool_flag()) {
-            std::string t = "true";
-            append_text(t.c_str());
-        } else {
-            std::string f = "false";
-            append_text(f.c_str());
-        }
     }
     nodes_.pop();
 }
