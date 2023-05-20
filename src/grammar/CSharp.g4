@@ -3,7 +3,7 @@ grammar CSharp;
 program: class EOF;
 class: CLASS ID CLB expression CRB;
 expression: (expressions)*;
-expressions: ( func_def | (assign_statement SEMICOLON) | (mas_statement SEMICOLON) | if_statement | for_statement | print_statement | read_statement);
+expressions: ( func_def | (assign_statement SEMICOLON) | (mas_statement SEMICOLON));
 mas_statement: (mas_def | mas_change) (
 				ASSIGN (
 					(arg (BINARY_OP arg)?)

@@ -10,7 +10,7 @@ class Program
 	int[] h = new int[5]{1,2,3,4,5};
 	static void Main(string[] args)
 	{
-		int a = 2;
+		int a = 2 + 3;
 		int b = 2;
 		int c = 0;
 		bool d = true;

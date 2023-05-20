@@ -52,26 +52,6 @@ std::any Builder::visitExpressions(CSharpParser::ExpressionsContext *context)  {
         std::any_cast<Node*>(visit(context->mas_statement())));
         return static_cast<Node*>(program_.create_node<Expressions>(mas));
     }
-    if (context->if_statement() != nullptr) {
-        auto* i_s =
-        dynamic_cast<If_statement*>(std::any_cast<Node*>(visit(context->if_statement())));
-        return static_cast<Node*>(program_.create_node<Expressions>(i_s));
-    }
-    if (context->for_statement() != nullptr) {
-        auto* f_s = dynamic_cast<For_statement*>(
-        std::any_cast<Node*>(visit(context->for_statement())));
-        return static_cast<Node*>(program_.create_node<Expressions>(f_s));
-    }
-    if (context->read_statement() != nullptr) {
-        auto* r_s =
-        dynamic_cast<Read_statement*>(std::any_cast<Node*>(visit(context->read_statement())));
-        return static_cast<Node*>(program_.create_node<Expressions>(r_s));
-    }
-    if (context->print_statement() != nullptr) {
-        auto* p_s =
-        dynamic_cast<Print_statement*>(std::any_cast<Node*>(visit(context->print_statement())));
-        return static_cast<Node*>(program_.create_node<Expressions>(p_s));
-    }
     return 0;
 }
 

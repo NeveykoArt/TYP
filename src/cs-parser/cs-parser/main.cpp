@@ -11,6 +11,7 @@
 const char* const file_path_opt = "file-path";
 const char* const dump_tokens_opt = "dump-tokens";
 const char* const dump_ast_opt = "dump-ast";
+const char* const dump_table_opt = "dump-table";
 
 int main(int argc, char **argv) {
   cxxopts::Options options("csharp-parser", "ANTLR4 csharp parser example");
@@ -23,6 +24,7 @@ int main(int argc, char **argv) {
         (file_path_opt, "", cxxopts::value<std::string>())
         (dump_tokens_opt, "")
         (dump_ast_opt, "")
+        (dump_table_opt, "")
         ("h,help", "Print help");
     // clang-format on
 
@@ -44,12 +46,17 @@ int main(int argc, char **argv) {
 
     if (result.count(dump_tokens_opt) > 0) {
       csharp::dump_tokens(input_stream, std::cout);
-    } else if (result.count(dump_ast_opt) > 0) {
+    } else {
       auto parser_result = csharp::parse(input_stream);
-      if (!parser_result.errors_.empty()) {
-        csharp::dump_errors(parser_result.errors_, std::cerr);
-      } else {
-        csharp::dump_ast(parser_result.program_, std::cout);
+      auto symbol_table = csharp::ast::SymbolTableVisitor::exec(parser_result.program_);
+      if (result.count(dump_ast_opt) > 0) {
+        if (!parser_result.errors_.empty()) {
+          csharp::dump_errors(parser_result.errors_, std::cerr);
+        } else {
+          csharp::dump_ast(parser_result.program_, std::cout);
+        }
+      } else if (result.count(dump_table_opt) > 0) {
+        csharp::dump_table(symbol_table);
       }
     }
   } catch (const std::exception &e) {

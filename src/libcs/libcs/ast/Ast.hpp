@@ -154,6 +154,8 @@ public:
     void accept(Visitor& visitor) override;
 };
 
+
+
 class Length final : public Node {
 private:
     std::string id_number_;
@@ -166,6 +168,8 @@ public:
 
     void accept(Visitor& visitor) override;
 };
+
+
 
 class Mas_change final : public Node {
 private:
