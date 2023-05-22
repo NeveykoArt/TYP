@@ -78,4 +78,15 @@ void dump_errors(const Errors& errors, std::ostream& out) {
   }
 }
 
+void generate_code(
+    ast::Program &program, ast::SymbolTable &symbol_table, std::ostream &out) {
+    ast::CodeGenerator::exec(program, symbol_table, out);
+}
+
+void generate_exec(std::string_view input_file, std::string_view output_file) {
+    std::stringstream ss;
+    ss << "clang " << input_file << " -o " << output_file;
+    system(ss.str().c_str());
+}
+
 }  // namespace csharp

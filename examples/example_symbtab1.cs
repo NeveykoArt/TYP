@@ -1,11 +1,10 @@
 class Program
 {
 	static int sum(int a, int b) {
-		int c = a + b;
-		return c;
+		return 0;
 	}
-	static int sum(int a, int b) {
-		int c = a + b;
-		return c;
+	void main(string[] args) {
+		Console.WriteLine("Hello");
+		return;
 	}
 }

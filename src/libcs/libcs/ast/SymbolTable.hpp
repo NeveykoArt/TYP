@@ -1,3 +1,5 @@
+#pragma once
+
 #include <libcs/ast/Visitor.hpp>
 #include <vector>
 

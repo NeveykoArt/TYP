@@ -2,7 +2,7 @@
 
 readonly antlr=antlr-4.11.1-complete.jar
 
-FILE=/home/admin/tyapka/TYP/build
+FILE=build
 if test -d "$FILE"; then
 	echo "$FILE существует"
 	cmake --build --preset debug

@@ -14,12 +14,14 @@ target_sources(
     libcs/ast/Visitor.hpp
     libcs/ast/Serializer.hpp
     libcs/ast/SymbolTable.hpp
+    libcs/ast/CodeGenerator.hpp
     libcs/dump_tokens.hpp
     libcs/parser.hpp
   PRIVATE
     libcs/ast/detail/Builder.cpp
     libcs/ast/detail/Builder.hpp
     libcs/ast/SymbolTable.cpp
+    libcs/ast/CodeGenerator.cpp
     libcs/ast/Ast.cpp
     libcs/ast/Serializer.cpp
     libcs/dump_tokens.cpp

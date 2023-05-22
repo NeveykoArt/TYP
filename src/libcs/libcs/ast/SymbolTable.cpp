@@ -94,6 +94,10 @@ void SymbolTableVisitor::visit(Func_def &node) {
 }
 
 void SymbolTableVisitor::visit(Read_statement &node) {
+    if (node.get_read()->get_arg() != nullptr) {
+        throw SemanticError(
+                "Must be the variable for Read Statement");
+    }
     node.get_read()->accept(*this);
 }
 
