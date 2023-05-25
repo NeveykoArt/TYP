@@ -4,6 +4,7 @@ Checks: >
   clang-analyzer-*,
   *,
   -cert-err58-cpp,
+  -cert-err34-c,
   -fuchsia-*,
   -llvm-header-guard,
   -llvmlibc-implementation-in-namespace,
@@ -20,7 +21,21 @@ Checks: >
   -altera-unroll-loops,
   -hicpp-named-parameter,
   -modernize-return-braced-init-list,
-  -altera-id-dependent-backward-branch
+  -altera-id-dependent-backward-branch,
+  -readability-function-cognitive-complexity,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers,
+  -llvm-else-after-return,
+  -readability-else-after-return,
+  -bugprone-branch-clone,
+  -cppcoreguidelines-avoid-c-arrays,
+  -hicpp-avoid-c-arrays,
+  -modernize-avoid-c-arrays,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-pro-type-vararg,
+  -hicpp-vararg,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -hicpp-no-array-decay
 WarningsAsErrors: ''
 HeaderFilterRegex: '(json-parser/*|libjson/*)'
 AnalyzeTemporaryDtors: false

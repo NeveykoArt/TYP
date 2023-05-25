@@ -2,4 +2,6 @@ build
 cmake-build-debug
 cmake-build-release
 .kdev4/
+*.exe
+*.ll
 TYP.kdev4

@@ -18,18 +18,18 @@ false_: FALSE_;
 TRUE_: 'true';
 FALSE_: 'false';
 
-mas_selection: NEW VAR SLP (length)? SRP (CLB (literal (COMMA literal)*) CRB)?;
+mas_selection: NEW VAR SLP length SRP (CLB (literal (COMMA literal)*) CRB)?;
 mas_change: ID SLP length SRP;
 length: number | ID;
 number: NUMBER;
 mas_def: VAR SLP SRP ID;
 var_def: VAR ID;
 
-func_def: (((KEYWORD*)? VAR) | ((KEYWORD*)? VOID)) ID RLP pars RRP (CLB scope return_statement CRB);
+func_def: (((KEYWORD*)? VAR) | ((KEYWORD*)? VOID)) ID RLP pars? RRP (CLB scope return_statement CRB);
 scope: (statement)*;
-return_statement: RETURN (arg)? SEMICOLON;
+return_statement: RETURN (arg | func_call)? SEMICOLON;
 statement: (func_call SEMICOLON)
-	| (assign_statement SEMICOLON) | (mas_statement SEMICOLON)
+	| (assign_statement SEMICOLON) | (mas_statement SEMICOLON) | return_statement
 	| if_statement | for_statement | (kw_statement SEMICOLON) | print_statement | read_statement;
 func_call: ID RLP args RRP;
 args: (arg (COMMA arg)*)?;

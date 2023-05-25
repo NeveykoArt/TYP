@@ -1,8 +1,8 @@
 #pragma once
 
-#include <libcs/ast/SymbolTable.hpp>
-#include <libcs/ast/CodeGenerator.hpp>
 #include <libcs/ast/Ast.hpp>
+#include <libcs/ast/CodeGenerator.hpp>
+#include <libcs/ast/SymbolTable.hpp>
 
 #include <iosfwd>
 
@@ -33,14 +33,16 @@ struct ParseResult {
   }
 };
 
-ParseResult parse(std::ifstream &input_stream);
+ParseResult parse(std::ifstream& input_stream);
 
-void dump_table(ast::SymbolTable &symb_tab);
-void dump_ast(ast::Program &program, std::ostream& stream);
-void dump_errors(const Errors &errors, std::ostream& out);
+void dump_table(ast::SymbolTable& symb_tab);
+void dump_ast(ast::Program& program, std::ostream& stream);
+void dump_errors(const Errors& errors, std::ostream& out);
 
 void generate_code(
-    ast::Program &program, ast::SymbolTable &symbol_table, std::ostream &out);
+    ast::Program& program,
+    ast::SymbolTable& symbol_table,
+    std::ostream& out);
 
 void generate_exec(std::string_view input_file, std::string_view output_file);
 

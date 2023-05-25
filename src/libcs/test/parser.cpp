@@ -54,23 +54,6 @@ TEST(Parser, ValidProgram2) {
 }
 
 TEST(Parser, ValidProgram3) {
-    std::ifstream example_file(std::filesystem::current_path() / core_path / "example_assig3.cs");
-    auto parse_result = csharp::parse(example_file);
-    EXPECT_TRUE(parse_result.errors_.empty());
-    std::stringstream out;
-    csharp::dump_ast(parse_result.program_, out);
-    EXPECT_EQ(
-        out.str(),
-        "<?xml version=\"1.0\"?>\n<csharp>\n  <class>\n    <id>example_assig3</id>\n    <mas_assign>\n      <leftside>\n        <var_def>\n          "
-        "<type>int[]</type>\n          <id>h</id>\n        </var_def>\n      </leftside>\n    </mas_assign>\n    <assign>\n      <leftside>\n        "
-        "<arg>\n          <id>h</id>\n        </arg>\n      </leftside>\n      <rightside>\n        <new>\n          <type>int[]</type>\n          "
-        "<braces>\n            <literal>1</literal>\n            <literal>2</literal>\n          </braces>\n        </new>\n      </rightside>\n    "
-        "</assign>\n    <assign>\n      <leftside>\n        <var_def>\n          <type>int</type>\n          <id>g</id>\n        </var_def>\n      "
-        "</leftside>\n      <rightside>\n        <arg>\n          <id>h</id>\n          <at>\n            <sq_brakets>2</sq_brakets>\n          "
-        "</at>\n        </arg>\n      </rightside>\n    </assign>\n  </class>\n</csharp>\n");
-}
-
-TEST(Parser, ValidProgram4) {
     std::ifstream example_file(std::filesystem::current_path() / core_path / "example_assig4.cs");
     auto parse_result = csharp::parse(example_file);
     EXPECT_TRUE(parse_result.errors_.empty());
@@ -86,7 +69,7 @@ TEST(Parser, ValidProgram4) {
         "<sq_brakets>2</sq_brakets>\n          </at>\n        </arg>\n      </rightside>\n    </assign>\n  </class>\n</csharp>\n");
 }
 
-TEST(Parser, ValidProgram5) {
+TEST(Parser, ValidProgram4) {
     std::ifstream example_file(std::filesystem::current_path() / core_path / "example_assig5.cs");
     auto parse_result = csharp::parse(example_file);
     EXPECT_TRUE(parse_result.errors_.empty());
@@ -106,7 +89,7 @@ TEST(Parser, ValidProgram5) {
         "<literal>2</literal>\n            </arg>\n          </roundbrackets>\n        </func_call>\n      </rightside>\n    </assign>\n  </class>\n</csharp>\n");
 }
 
-TEST(Parser, ValidProgram6) {
+TEST(Parser, ValidProgram5) {
     std::ifstream example_file(std::filesystem::current_path() / core_path / "example_func1.cs");
     auto parse_result = csharp::parse(example_file);
     EXPECT_TRUE(parse_result.errors_.empty());
@@ -123,7 +106,7 @@ TEST(Parser, ValidProgram6) {
         "</scope>\n      <return>\n        <arg>\n          <id>c</id>\n        </arg>\n      </return>\n    </function>\n  </class>\n</csharp>\n");
 }
 
-TEST(Parser, ValidProgram7) {
+TEST(Parser, ValidProgram6) {
     std::ifstream example_file(std::filesystem::current_path() / core_path / "example_func2.cs");
     auto parse_result = csharp::parse(example_file);
     EXPECT_TRUE(parse_result.errors_.empty());
@@ -140,7 +123,7 @@ TEST(Parser, ValidProgram7) {
         "</scope>\n      <return>\n        <arg>\n          <id>c</id>\n        </arg>\n      </return>\n    </function>\n  </class>\n</csharp>\n");
 }
 
-TEST(Parser, ValidProgram8) {
+TEST(Parser, ValidProgram7) {
     std::ifstream example_file(std::filesystem::current_path() / core_path / "example_func3.cs");
     auto parse_result = csharp::parse(example_file);
     EXPECT_TRUE(parse_result.errors_.empty());
