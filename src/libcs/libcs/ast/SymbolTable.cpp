@@ -7,39 +7,37 @@
 namespace csharp::ast {
 
 std::size_t SymbolTableVisitor::getScopeLvl() {
-  for (auto el : global_table_) {
-    if ((el.get_table_typ() == "Scope") && (el.get_obj_name() == "--------")) {
-      return (el.get_scope_level() - 1);
+    for (auto el = global_table_.rbegin(); el != global_table_.rend(); ++el) {
+        if ((el->get_table_typ() == "Scope") && (el->get_obj_name() == "--------")) {
+            return (el->get_scope_level() - 1);
+        }
+        if ((el->get_table_typ() == "Scope") && (el->get_obj_name() != "--------")){
+            return (el->get_scope_level());
+        }
     }
-    if ((el.get_table_typ() == "Scope") && (el.get_obj_name() != "--------")) {
-      return (el.get_scope_level());
-    }
-  }
-  return 0;
+    return 0;
 }
 
-bool SymbolTableVisitor::contains(
-    const std::string& elem,
-    std::size_t& scop_lvl) {
-  auto sl = scop_lvl;
-  for (auto& el : global_table_) {
-    if (el.get_obj_name() == elem && el.get_scope_level() <= sl) {
-      return true;
+bool SymbolTableVisitor::contains(const std::string &elem, std::size_t &scop_lvl) {
+    auto sl = scop_lvl;
+    for (auto el = global_table_.rbegin(); el != global_table_.rend(); ++el) {
+        if (el->get_obj_name() == elem && el->get_scope_level() <= sl) {
+            return true;
+        }
+        if (el->get_scope_level() < sl) {
+            --sl;
+        }
     }
-    if (el.get_scope_level() < sl) {
-      --sl;
-    }
-  }
-  return false;
+    return false;
 }
 
 std::string SymbolTableVisitor::functype() {
-  for (auto& el : global_table_) {
-    if ((el.get_table_typ() == "function")) {
-      return el.get_var_typ();
+    for (auto el = global_table_.rbegin(); el != global_table_.rend(); ++el) {
+        if ((el->get_table_typ() == "function")) {
+            return el->get_var_typ();
+        }
     }
-  }
-  return "";
+    return "";
 }
 
 std::string SymbolTableVisitor::getTypeOf(const std::string& elem) {

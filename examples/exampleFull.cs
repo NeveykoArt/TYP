@@ -4,10 +4,6 @@ class Program
 		int c = a + b;
 		return c;
 	}
-	int e = 2;
-	int[] f;
-	int[] g = new int[]{1,2,3,4,5};
-	char[] h = new char[5]{'a', 'b', 'c', 'd', 'e'};
 	static void Main(string[] args)
 	{
 		int a = 2 + 3;
