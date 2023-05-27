@@ -138,7 +138,7 @@ TEST(Parser, ValidProgram7) {
         "<rightside>\n            <binary_op>\n              <op_type>+</op_type>\n              <arg>\n                <id>a</id>\n              "
         "</arg>\n              <arg>\n                <id>b</id>\n              </arg>\n            </binary_op>\n          </rightside>\n        "
         "</assign>\n      </scope>\n      <return>\n        <arg>\n          <id>c</id>\n        </arg>\n      </return>\n    </function>\n    "
-        "<function>\n      <function_type>static void</function_type>\n      <id>Main</id>\n      <pars>\n        <var_def>\n          "
+        "<function>\n      <function_type>static void</function_type>\n      <id>main</id>\n      <pars>\n        <var_def>\n          "
         "<type>string[]</type>\n          <id>args</id>\n        </var_def>\n      </pars>\n      <scope>\n        <assign>\n          <leftside>\n            "
         "<var_def>\n              <type>int</type>\n              <id>c</id>\n            </var_def>\n          </leftside>\n          <rightside>\n            "
         "<arg>\n              <literal>0</literal>\n            </arg>\n          </rightside>\n        </assign>\n        <assign>\n          "

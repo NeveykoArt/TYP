@@ -25,7 +25,13 @@ bool SymbolTableVisitor::contains(const std::string &elem, std::size_t &scop_lvl
             return true;
         }
         if (el->get_scope_level() < sl) {
-            --sl;
+          --sl;
+        }
+        if ((el->get_table_typ() == "Scope") && (el->get_obj_name() == "--------") && (el->get_scope_level() == sl)) {
+          --sl;
+        }
+        if ((el->get_table_typ() == "Scope") && (el->get_obj_name() != "--------") && (el->get_scope_level() == sl)) {
+          ++sl;
         }
     }
     return false;

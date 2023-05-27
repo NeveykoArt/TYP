@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
       csharp::generate_code(
           parser_result.program_, symbol_table, output_stream);
       output_stream.close();
-      if (result.count("--dump-asm") == 0) {
+      if (result.count(dump_asm_opt) > 0) {
         csharp::generate_exec(filename + ".ll", filename);
       }
     }

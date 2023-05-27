@@ -12,6 +12,7 @@
 namespace csharp::ast {
 
 std::size_t index = 0;
+std::size_t block_index = 0;
 std::map<std::string, std::pair<std::string, std::string>> name_index_params;
 std::size_t print_counter = 0;
 std::size_t scanf_counter = 0;
@@ -24,6 +25,7 @@ std::vector<std::string> operation_stack;
 std::size_t common_index = 0;
 std::size_t memset_flag = 0;
 std::size_t new_flag = 0;
+std::size_t slevel = 0;
 
 static std::string new_index() {
   std::string tmp;
@@ -258,8 +260,8 @@ void CodeGenerator::visit(Func_def& node) {
   }
   string_stream_ << ") #0 {\n";
 
-  string_stream_ << "v" << index << ":\n";
-  index++;
+  string_stream_ << "block" << block_index << ":\n";
+  block_index++;
 
   if (!node.get_pars()->get_pars_var().empty()) {
     for (auto& item : name_index_params) {
@@ -322,9 +324,14 @@ void CodeGenerator::visit(Pars& node) {
 }
 
 void CodeGenerator::visit(Scope& node) {
+  slevel++;
+  //auto tmp = block_index;
+  //block_index = 1;
   for (auto& c : node.get_args()) {
     c->get_statement_elem()->accept(*this);
   }
+  //block_index = tmp;
+  slevel--;
 }
 
 void CodeGenerator::visit(Func_call& node) {
@@ -468,31 +475,28 @@ void CodeGenerator::visit(If_statement& node) {
     }
     stack.pop_back();
   }
-  auto tmp1 = index;
-  string_stream_ << "br i1 " << tmpind << ", label %v" << index << ", label %v"
-                 << tmp1 + node.get_if_scope()->get_args().size() * 4 + 1
+  string_stream_ << "br i1 " << tmpind << ", label %block" << block_index << "." << slevel << ", label %block"
+                 << block_index + 1 << "." << slevel
                  << "\n";
-  string_stream_ << "v" << index << ":\n";
-  ++index;
+  string_stream_ << "block" << block_index << "." << slevel << ":\n";
+  block_index = block_index + 1;
+  auto tmp = block_index;
+  block_index = 1;
   node.get_if_scope()->accept(*this);
+  block_index = tmp;
   if (node.get_if_else() != nullptr) {
     string_stream_
-        << "br label %v"
-        << tmp1 + node.get_if_scope()->get_args().size() * 4 +
-               node.get_if_else()->get_else_scope()->get_args().size() * 4 + 1
+        << "br label %block"
+        << block_index + 1 << "." << slevel
         << "\n";
-    common_index = tmp1 + node.get_if_scope()->get_args().size() * 4 +
-                   node.get_if_else()->get_else_scope()->get_args().size() * 4 +
-                   1;
+    common_index = block_index + 1;
   } else {
-    string_stream_ << "br label %v"
-                   << tmp1 + node.get_if_scope()->get_args().size() * 4 + 1
+    string_stream_ << "br label %block"
+                   << block_index << "." << slevel
                    << "\n";
-    common_index = tmp1 + node.get_if_scope()->get_args().size() * 4 + 1;
   }
-  string_stream_ << "v" << tmp1 + node.get_if_scope()->get_args().size() * 4 + 1
+  string_stream_ << "block" << block_index << "." << slevel
                  << ":\n";
-  index = tmp1 + node.get_if_scope()->get_args().size() * 4 + 2;
   if (node.get_if_else() != nullptr) {
     node.get_if_else()->accept(*this);
   }
@@ -500,34 +504,34 @@ void CodeGenerator::visit(If_statement& node) {
 
 void CodeGenerator::visit(Else_statement& node) {
   node.get_else_scope()->accept(*this);
-  string_stream_ << "br label %v" << common_index << "\n";
-  string_stream_ << "v" << common_index << ":\n";
-  index = common_index + 1;
+  string_stream_ << "br label %block" << common_index << "." << slevel << "\n";
+  string_stream_ << "block" << common_index << "." << slevel << ":\n";
+  block_index = common_index + 1;
 }
 
 void CodeGenerator::visit(For_statement& node) {
   for_flag++;
   node.get_assign()->accept(*this);
-  string_stream_ << "br label %v" << index << "\n";
-  string_stream_ << "v" << index << ":\n";
-  auto the_first_index = index;
-  ++index;
+  string_stream_ << "br label %for" << block_index << "." << slevel << "\n";
+  string_stream_ << "for" << block_index << "." << slevel << ":\n";
+  auto the_first_index = block_index;
+  ++block_index;
   node.get_cond()->accept(*this);
-  auto tmp1 = index;
-  string_stream_ << "br i1 %v" << index - 1 << ", label %v" << tmp1
-                 << ", label %v"
-                 << tmp1 + node.get_scope()->get_args().size() * 4 + 6 << "\n";
-  common_index = tmp1 + node.get_scope()->get_args().size() * 4 + 6;
-  string_stream_ << "v" << index << ":\n";
-  ++index;
+  //auto tmp1 = index;
+  string_stream_ << "br i1 %v" << index - 1 << ", label %for" << block_index << "." << slevel
+                 << ", label %for"
+                 << block_index + 2 << "." << slevel << "\n";
+  common_index = block_index + 2;
+  string_stream_ << "for" << block_index << "." << slevel << ":\n";
+  ++block_index;
   node.get_scope()->accept(*this);
-  string_stream_ << "br label %v" << index << "\n";
-  string_stream_ << "v" << index << ":\n";
-  ++index;
+  string_stream_ << "br label %for" << block_index << "." << slevel << "\n";
+  string_stream_ << "for" << block_index << "." << slevel << ":\n";
+  ++block_index;
   node.get_oper()->accept(*this);
-  string_stream_ << "br label %v" << the_first_index << ", !llvm.loop !4\n";
-  string_stream_ << "v" << common_index << ":\n";
-  index = common_index + 1;
+  string_stream_ << "br label %for" << the_first_index << "." << slevel << ", !llvm.loop !4\n";
+  string_stream_ << "for" << common_index << "." << slevel << ":\n";
+  block_index = common_index + 1;
 }
 
 void CodeGenerator::visit(For_condition& node) {

@@ -247,7 +247,7 @@ std::any Builder::visitFunc_def(CSharpParser::Func_defContext* context) {
       dynamic_cast<Scope*>(std::any_cast<Node*>(visit(context->scope())));
   auto* return_tmp = dynamic_cast<Return_statement*>(
       std::any_cast<Node*>(visit(context->return_statement())));
-  auto func_name = context->ID()->getText();
+  auto func_name = normalize_register(context->ID()->getText());
 
   if (context->VOID() != nullptr) {
     bool void_tmp = true;
