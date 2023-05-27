@@ -500,6 +500,7 @@ void CodeGenerator::visit(If_statement& node) {
   if (node.get_if_else() != nullptr) {
     node.get_if_else()->accept(*this);
   }
+  block_index++;
 }
 
 void CodeGenerator::visit(Else_statement& node) {

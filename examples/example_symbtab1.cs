@@ -6,6 +6,10 @@ class Program
 			int j = n - 1;
 			return j;
 		}
+		if (n == 2) {
+			int j = n - 1;
+			return j;
+		}
 		int d = n - 1;
 		int e = n - 2;
 		int a = fibonacci(d);
@@ -14,7 +18,7 @@ class Program
 		return c;
 	}
 
-	static int main(string[] args)
+	static int Main(string[] args)
 	{
 		int n;
 		Console.WriteLine("enter the n number of fibonacci");
