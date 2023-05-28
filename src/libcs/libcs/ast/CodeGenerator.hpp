@@ -50,6 +50,8 @@ class CodeGenerator final : public Visitor {
   void visit([[maybe_unused]] Kw_statement& node) override {}
   void visit(Print_statement& node) override;
   void visit(Read_statement& node) override;
+
+  std::string gettypof(const std::string& elem);
 };
 
 }  // namespace csharp::ast

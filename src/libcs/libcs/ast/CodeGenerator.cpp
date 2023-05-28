@@ -325,13 +325,19 @@ void CodeGenerator::visit(Pars& node) {
 
 void CodeGenerator::visit(Scope& node) {
   slevel++;
-  //auto tmp = block_index;
-  //block_index = 1;
   for (auto& c : node.get_args()) {
     c->get_statement_elem()->accept(*this);
   }
-  //block_index = tmp;
   slevel--;
+}
+
+std::string CodeGenerator::gettypof(const std::string& elem) {
+  for (auto& el : symbol_table_) {
+    if (el.get_obj_name() == elem) {
+      return el.get_var_typ();
+    }
+  }
+  return "";
 }
 
 void CodeGenerator::visit(Func_call& node) {
@@ -386,8 +392,13 @@ void CodeGenerator::visit(Func_call& node) {
   }
   count = node.get_args()->get_args().size();
   tmpind = new_index();
-  string_stream_ << tmpind << " = call i32 @" << node.get_func_call_name()
-                 << "(";
+  if (get_llvm_typ(gettypof(node.get_func_call_name())) != "void") {
+    string_stream_ << tmpind << " = call " << get_llvm_typ(gettypof(node.get_func_call_name())) << " @" << node.get_func_call_name()
+                  << "(";
+  } else {
+    string_stream_ << "call " << get_llvm_typ(gettypof(node.get_func_call_name())) << " @" << node.get_func_call_name()
+                  << "(";
+  }
   while (count != 0) {
     string_stream_ << stack.back().second.second << " " << stack.back().first;
     stack.pop_back();
@@ -397,14 +408,16 @@ void CodeGenerator::visit(Func_call& node) {
     --count;
   }
   string_stream_ << ")\n";
-  if (stack.back().second.second == "int" ||
-      stack.back().second.second == "i32") {
-    string_stream_ << "store i32 " << tmpind << ", i32* " << stack.back().first
-                   << ", align 4\n";
-  }
-  if (stack.back().second.second == "float") {
-    string_stream_ << "store float " << tmpind << ", float* "
-                   << stack.back().first << ", align 4\n";
+  if (get_llvm_typ(gettypof(node.get_func_call_name())) != "void") {
+    if (stack.back().second.second == "int" ||
+        stack.back().second.second == "i32") {
+      string_stream_ << "store i32 " << tmpind << ", i32* " << stack.back().first
+                    << ", align 4\n";
+    }
+    if (stack.back().second.second == "float") {
+      string_stream_ << "store float " << tmpind << ", float* "
+                    << stack.back().first << ", align 4\n";
+    }
   }
 }
 
@@ -522,17 +535,20 @@ void CodeGenerator::visit(For_statement& node) {
   string_stream_ << "br i1 %v" << index - 1 << ", label %for" << block_index << "." << slevel
                  << ", label %for"
                  << block_index + 2 << "." << slevel << "\n";
-  common_index = block_index + 2;
+  auto tmp_index = block_index + 1;
   string_stream_ << "for" << block_index << "." << slevel << ":\n";
   ++block_index;
+  auto tmp = block_index;
+  block_index = 1;
   node.get_scope()->accept(*this);
+  block_index = tmp;
   string_stream_ << "br label %for" << block_index << "." << slevel << "\n";
   string_stream_ << "for" << block_index << "." << slevel << ":\n";
   ++block_index;
   node.get_oper()->accept(*this);
   string_stream_ << "br label %for" << the_first_index << "." << slevel << ", !llvm.loop !4\n";
-  string_stream_ << "for" << common_index << "." << slevel << ":\n";
-  block_index = common_index + 1;
+  string_stream_ << "for" << tmp_index + 1 << "." << slevel << ":\n";
+  block_index = tmp_index + 2;
 }
 
 void CodeGenerator::visit(For_condition& node) {
@@ -544,6 +560,7 @@ void CodeGenerator::visit(For_condition& node) {
   string_stream_ << tmpind << " = load " << ret_typ << ", " << ret_typ << "* "
                  << ind << ", align 4\n";
   stack.emplace_back(std::make_pair(tmpind, std::make_pair(ind, ret_typ)));
+  //variables_tab[node.get_for_cond_1_arg()].first = tmpind;
   if (node.get_for_cond_2_arg()->get_arg() != nullptr) {
     tmpind = new_index();
     if (node.get_for_cond_2_arg()->get_arg()->get_var_typ() == "int") {
@@ -683,7 +700,7 @@ void CodeGenerator::calculation() {
     string_stream_ << tmpind2 << " = load i32, i32* " << second_.first
                    << ", align 4\n";
     string_stream_ << tmpind3 << " = "
-                   << get_llvm_op(operation_stack.back(), "i32") << " nsw i32 "
+                   << get_llvm_op(operation_stack.back(), "i32") << " i32 "
                    << tmpind2 << ", " << tmpind1 << "\n";
     string_stream_ << "store i32 " << tmpind3 << ", i32* " << answ_.first
                    << ", align 4\n";
